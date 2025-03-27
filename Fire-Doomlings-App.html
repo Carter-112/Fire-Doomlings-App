@@ -1,10 +1,79 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
-    <style>:root {
+    <style>
+/* Add to your style section */
+#trinketsSection {
+  padding-top: 0.1px; /* Prevents margin collapse */
+}
+
+#trinketsSection > .section-title {
+  margin-top: 0; /* Remove top margin */
+}
+   
+/* Phoenix Logo Styles */
+.phoenix-logo {
+  position: relative;
+  width: 300px;
+  height: 220px;
+  margin: 1rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.phoenix-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('file-UBtxsYSrz61TyuEGnkTdb1.webp');
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+  filter: drop-shadow(0 0 15px rgba(255, 120, 50, 0.5));
+  z-index: 1;
+}
+
+.logo-text {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 0 0 8px 8px;
+  width: 100%;
+  backdrop-filter: blur(2px);
+}
+
+.logo-text h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+  color: transparent;
+  background: linear-gradient(to right, #ff3c00, #3ca0ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: 0 0 10px rgba(255, 60, 0, 0.3);
+  letter-spacing: 1px;
+}
+
+.logo-text h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 3px;
+  opacity: 0.9;
+}
+   
+    :root {
     --bg-color: #0f0a0c;
     --bg-gradient: linear-gradient(135deg, #0f0a0c 0%, #1a0a10 50%, #0a0a12 100%);
     --card-bg: #16090d;
@@ -51,7 +120,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: 
+    background-image:
         url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,50 Q35,40 50,50 Q65,60 80,50' style='fill:none;stroke:rgba(255,60,0,0.03);stroke-width:0.5'/%3E%3C/svg%3E"),
         url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M15,40 Q30,20 40,40 Q50,60 65,40' style='fill:none;stroke:rgba(255,120,0,0.02);stroke-width:0.5'/%3E%3C/svg%3E");
     background-position: 0 0, 40px 40px;
@@ -67,6 +136,19 @@ body::before {
     padding: 0.5rem;
     position: relative;
     z-index: 1;
+}
+
+/* Responsive container width for larger screens */
+@media screen and (min-width: 768px) {
+    .container {
+        max-width: 700px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .container {
+        max-width: 900px;
+    }
 }
 
 /* =========== EMBER PARTICLES =========== */
@@ -95,31 +177,6 @@ body::before {
 }
 
 /* =========== TITLES & HEADERS =========== */
-.title {
-    text-align: center;
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: var(--accent1);
-    margin: 1rem 0;
-    text-shadow: var(--text-shadow), 0 0 15px rgba(255, 60, 0, 0.7);
-    letter-spacing: 1px;
-    position: relative;
-    overflow: hidden;
-    padding: 0.5rem 0;
-    animation: textPulse 3s infinite alternate;
-}
-
-.title::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70%;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, var(--accent1), transparent);
-    animation: fireGlow 2s infinite alternate;
-}
 
 .section-title {
     text-align: center;
@@ -158,6 +215,34 @@ body::before {
     overflow: hidden;
 }
 
+/* Improved card layout for desktop */
+@media screen and (min-width: 768px) {
+    .dominant-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+   
+    .player-meaning-cards, .player-trinkets {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+   
+    .age-navigation {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        align-items: center;
+    }
+   
+    .name-inputs {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+    }
+}
+
 .player-control::before, .mode-toggle::before, .age-config::before,
 .player-meaning-card::before, .player-trinket-card::before {
     content: "";
@@ -166,7 +251,7 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
+    background:
         radial-gradient(circle at 10% 10%, rgba(255, 150, 30, 0.1), transparent 50%),
         radial-gradient(circle at 90% 90%, rgba(255, 70, 30, 0.1), transparent 50%);
     z-index: 0;
@@ -195,9 +280,9 @@ body::before {
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 100, 0, 0.05), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 100, 0, 0.05),
         transparent);
     animation: lavaSweep 7s infinite;
     pointer-events: none;
@@ -210,8 +295,44 @@ body::before {
     grid-template-rows: repeat(2, auto);
     gap: 10px;
     width: 100%;
-    margin-bottom: 10px;
+    margin: 0 auto 10px;
     position: relative;
+    justify-content: center;
+    text-align: center;
+}
+
+.nav > .nav-button:nth-child(4),
+.nav > .nav-button:nth-child(5) {
+    width: 90%;
+    margin: 0 auto;
+}
+
+@media screen and (min-width: 500px) and (max-width: 767px) {
+    .nav {
+        width: 80%;
+        max-width: 500px;
+    }
+}
+
+/* Responsive nav layout for larger screens */
+@media screen and (min-width: 768px) {
+    .nav {
+        grid-template-columns: repeat(5, 1fr);
+        grid-template-rows: 1fr;
+        max-width: 800px;
+        margin: 0 auto 20px;
+    }
+   
+    .nav > .nav-button:nth-child(1),
+    .nav > .nav-button:nth-child(2),
+    .nav > .nav-button:nth-child(3),
+    .nav > .nav-button:nth-child(4),
+    .nav > .nav-button:nth-child(5) {
+        grid-column: auto;
+        grid-row: 1;
+        margin-left: 0;
+        width: 100%;
+    }
 }
 
 .nav::before {
@@ -222,11 +343,11 @@ body::before {
     transform: translateX(-50%);
     width: 80%;
     height: 2px;
-    background: linear-gradient(90deg, 
-        transparent, 
-        var(--accent-blue), 
-        var(--accent-blue-glow), 
-        var(--accent-blue), 
+    background: linear-gradient(90deg,
+        transparent,
+        var(--accent-blue),
+        var(--accent-blue-glow),
+        var(--accent-blue),
         transparent);
     opacity: 0.7;
     border-radius: 2px;
@@ -285,9 +406,9 @@ body::before {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(40, 170, 255, 0.2), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(40, 170, 255, 0.2),
         transparent);
     animation: blueWaveSweep 5s infinite;
 }
@@ -336,6 +457,22 @@ body::before {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Responsive card layout for mobile */
+@media screen and (max-width: 500px) {
+    .dominant-card {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+    }
+   
+    .dominant-card .dominant-buttons {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 10px;
+    }
+}
+
 .dominant-card::before {
     content: "";
     position: absolute;
@@ -343,9 +480,9 @@ body::before {
     left: -150%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 100, 0, 0.05), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 100, 0, 0.05),
         transparent);
     transform: skewX(-20deg);
     animation: lavaShimmer 8s infinite;
@@ -411,9 +548,9 @@ body::before {
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.2), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
         transparent);
     transform: skewX(-20deg);
     animation: buttonSweep 3s infinite;
@@ -457,9 +594,9 @@ button::after {
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.2), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
         transparent);
     transform: skewX(-20deg);
     animation: buttonSweep 3s infinite;
@@ -576,6 +713,25 @@ button::after {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+/* Responsive design for trinkets section */
+@media screen and (min-width: 768px) {
+    .trinkets-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+    }
+   
+    .trinket-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+   
+    .trinket-actions {
+        margin-top: auto;
+    }
+}
+
 .trinket-card::before {
     content: "";
     position: absolute;
@@ -583,9 +739,9 @@ button::after {
     left: -150%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 120, 0, 0.05), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 120, 0, 0.05),
         transparent);
     transform: skewX(-20deg);
     animation: lavaShimmer 10s infinite;
@@ -646,26 +802,26 @@ button::after {
     overflow: hidden;
 }
 
-.add-btn { 
-    background: linear-gradient(45deg, #308f70, #4ecca3); 
+.add-btn {
+    background: linear-gradient(45deg, #308f70, #4ecca3);
 }
-.add-btn:hover { 
+.add-btn:hover {
     background: linear-gradient(45deg, #4ecca3, #60ffc0);
     transform: translateY(-2px);
 }
 
-.remove-btn { 
-    background: linear-gradient(45deg, #b02038, #e94560); 
+.remove-btn {
+    background: linear-gradient(45deg, #b02038, #e94560);
 }
-.remove-btn:hover { 
+.remove-btn:hover {
     background: linear-gradient(45deg, #e94560, #ff6080);
     transform: translateY(-2px);
 }
 
-.pocket-btn { 
-    background: linear-gradient(45deg, var(--blue-dark), var(--blue-accent)); 
+.pocket-btn {
+    background: linear-gradient(45deg, var(--blue-dark), var(--blue-accent));
 }
-.pocket-btn:hover { 
+.pocket-btn:hover {
     background: linear-gradient(45deg, var(--blue-accent), var(--accent-blue-glow));
     transform: translateY(-2px);
 }
@@ -744,9 +900,9 @@ button::after {
     left: -100%;
     width: 50%;
     height: 100%;
-    background: linear-gradient(90deg, 
-        transparent, 
-        rgba(255, 255, 255, 0.2), 
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
         transparent);
     transform: skewX(-20deg);
     animation: buttonSweep 3s infinite;
@@ -859,43 +1015,215 @@ button::after {
         font-size: 0.85rem;
         padding: 10px 5px;
     }
-    
+   
     .title {
         font-size: 2.2rem;
     }
-    
+   
     .section-title {
         font-size: 1.5rem;
     }
-    
+   
     button {
         padding: 0.65rem 1.2rem;
         font-size: 1rem;
     }
-    
+   
     .rule-display, .age-display {
         padding: 0.85rem;
     }
 }
 
-/* Blue accent elements scattered throughout the interface */
-.blue-accent-element {
-    position: absolute;
-    pointer-events: none;
-    background-color: var(--accent-blue-glow);
-    opacity: 0.1;
-    border-radius: 50%;
-    filter: blur(2px);
-    animation: blueAccentPulse 4s infinite alternate;
+.blue-glow-container {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
 }
 
-@keyframes blueAccentPulse {
-    0% { transform: scale(0.8); opacity: 0.05; }
-    100% { transform: scale(1.1); opacity: 0.15; }
+.blue-circles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.blue-circle {
+  position: absolute;
+  background: radial-gradient(circle, #00e6ff 0%, rgba(0, 230, 255, 0) 70%);
+  border-radius: 50%;
+  filter: blur(10px);
+  animation: pulse 5s infinite alternate;
+  width: 120px;
+  height: 120px;
+}
+
+.blue-circle:nth-child(1) {
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.blue-circle:nth-child(2) {
+  top: 60%;
+  left: 20%;
+  width: 150px;
+  height: 150px;
+  animation-delay: 1s;
+}
+
+.blue-circle:nth-child(3) {
+  top: 30%;
+  left: 70%;
+  width: 180px;
+  height: 180px;
+  animation-delay: 2s;
+}
+
+.blue-circle:nth-child(4) {
+  top: 70%;
+  left: 80%;
+  animation-delay: 3s;
+}
+
+.blue-circle:nth-child(5) {
+  top: 45%;
+  left: 50%;
+  width: 200px;
+  height: 200px;
+  animation-delay: 4s;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; transform: scale(1); }
+  100% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* Phoenix Logo Responsive Styles */
+@media screen and (min-width: 768px) {
+    .phoenix-logo {
+        width: 400px;
+        height: 160px;
+        margin: 1rem auto;
+    }
+   
+    .logo-text h1 {
+        font-size: 42px;
+    }
+   
+    .logo-text h2 {
+        font-size: 20px;
+    }
+   
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Enhanced desktop styles */
+@media screen and (min-width: 992px) {
+    body {
+        padding: 20px;
+    }
+   
+    .container {
+        max-width: 1000px;
+    }
+   
+    /* Improve readability and spacing on larger screens */
+    .rule-display, .age-display {
+        font-size: 1.1rem;
+        padding: 1.5rem;
+    }
+   
+    /* Make buttons more comfortable to use with mouse */
+    button, .nav-button, .generate-btn {
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+   
+    button:hover, .nav-button:hover, .generate-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+   
+    /* Better form controls on desktop */
+    input[type="range"] {
+        height: 8px;
+    }
+   
+    input[type="range"]::-webkit-slider-thumb {
+        width: 20px;
+        height: 20px;
+    }
+   
+    select {
+        padding: 8px;
+    }
+   
+    /* Desktop optimized layout for meaning cards */
+    .meaning-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Fix the dominant cards to ensure original functionality */
+.dominant-card .dominant-button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+@media screen and (min-width: 768px) {
+    .dominant-card {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        grid-template-rows: auto auto;
+    }
+   
+    .dominant-card .tier-description {
+        grid-column: 1 / -1;
+        margin-top: 8px;
+    }
+}
+
+/* Make sure meaning of life cards display properly */
+.player-meaning-card {
+    margin-bottom: 15px;
+}
+
+.meaning-cards-container {
+    margin-top: 10px;
+}
+
+@media screen and (min-width: 768px) {
+    .meaning-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+    }
 }
 </style>
 </head>
 <body>
+<div class="blue-glow-container">
+  <div class="blue-circles">
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+  </div>
+</div>
     <div class="container">
       <div class="nav">
     <button class="nav-button" onclick="showSection('challenges')">Challenges</button>
@@ -906,55 +1234,55 @@ button::after {
 </div>
         <div id="ageSetupSection" class="age-setup-section">
             <h2 class="section-title">Age Setup</h2>
-            
+           
             <div class="age-config">
                 <div class="slider-container">
                     <span>Normal Ages: </span>
                     <span id="normalCount">0</span>
                     <input type="range" class="slider" min="0" max="0" value="0" id="normalSlider">
                 </div>
-                
+               
                 <div class="slider-container">
                     <span>Merchant Ages: </span>
                     <span id="merchantCount">0</span>
                     <input type="range" class="slider" min="0" max="0" value="0" id="merchantSlider">
                 </div>
-                
+               
                 <div class="slider-container">
                     <span>Catastrophe Ages: </span>
                     <span id="catastropheCount">0</span>
                     <input type="range" class="slider" min="0" max="0" value="0" id="catastropheSlider">
                 </div>
-                
+               
                 <div class="mode-toggle">
                     <input type="checkbox" id="finalCatastropheMode" checked>
                     <label for="finalCatastropheMode">Final Catastrophe at End</label>
                 </div>
             </div>
-            
+           
             <button class="generate-btn" onclick="generateAgeDeck()">Generate Age Deck</button>
-            
+           
             <div class="age-navigation">
                 <button class="nav-button" onclick="previousAge()">Previous Age</button>
                 <span id="ageCounter"></span>
                 <button class="nav-button" onclick="nextAge()">Next Age</button>
             </div>
-            
+           
             <div class="age-display" id="ageDisplay">
                 Generate a deck to start
             </div>
         </div>
 
         <div id="challengesSection">
-            <h1 class="title">DOOMlings</h1>
-            
+            <h1 class="section-title">Challenges</h1>
+           
             <div class="player-control">
                 <div class="slider-container">
                     <span>Players: </span>
                     <span id="playerCount">2</span>
                     <input type="range" class="slider" min="2" max="6" value="2" id="playerSlider">
                 </div>
-                
+               
                 <div class="mode-toggle">
                     <input type="checkbox" id="catastropheMode">
                     <label for="catastropheMode">Catastrophe Mode</label>
@@ -975,20 +1303,21 @@ button::after {
         </div>
 
         <div id="dominantSection" class="dominant-section">
+          <h2 class="section-title">Dominants</h2>
             <div class="dominant-list" id="dominantList"></div>
         </div>
         <div id="meaningOfLifeSection" class="meaning-section">
     <h2 class="section-title">Meaning of Life</h2>
-    
+   
     <div class="player-control">
         <button id="assignMeaningCards" class="generate-btn">Assign Meaning of Life Cards</button>
         <div id="meaningCardStatus" class="status-display"></div>
     </div>
-    
+   
     <div id="playerMeaningCards" class="player-meaning-cards">
         <!-- Player cards will be generated here -->
     </div>
-    
+   
     <div class="action-buttons">
         <button id="worldsEndButton" class="nav-button">World's End: Reveal All</button>
         <button id="resetMeaningButton" class="nav-button">Reset Cards</button>
@@ -998,16 +1327,16 @@ button::after {
 <!-- Trinkets Section -->
 <div id="trinketsSection" class="trinkets-section">
     <h2 class="section-title">Trinkets</h2>
-    
+   
     <div class="player-control">
         <button id="assignTrinkets" class="generate-btn">Assign Trinkets</button>
         <div id="trinketStatus" class="status-display"></div>
     </div>
-    
+   
     <div id="playerTrinkets" class="player-trinkets">
         <!-- Player trinket cards will be generated here -->
     </div>
-    
+   
     <div class="action-buttons">
         <button id="worldsEndTrinketButton" class="nav-button">World's End: Show Scores</button>
         <button id="resetTrinketsButton" class="nav-button">Reset Trinkets</button>
@@ -1029,7 +1358,7 @@ function addBlueAccents() {
         { top: '85%', right: '10%', size: '70px' },
         { top: '50%', left: '8%', size: '90px' }
     ];
-    
+   
     positions.forEach(pos => {
         const accent = document.createElement('div');
         accent.className = 'blue-accent-element';
@@ -1045,7 +1374,7 @@ addBlueAccents();
 // Generate ember particles
 function createEmbers() {
     const count = 30; // Number of embers
-    
+   
     for (let i = 0; i < count; i++) {
         setTimeout(() => {
             const ember = document.createElement('div');
@@ -1054,39 +1383,39 @@ function createEmbers() {
             ember.style.bottom = `-20px`;
             ember.style.width = `${2 + Math.random() * 6}px`;
             ember.style.height = ember.style.width;
-            
+           
             const duration = 5 + Math.random() * 15;
             const delay = Math.random() * 10;
-            
+           
             ember.style.animation = `floatUp ${duration}s ease-in ${delay}s infinite`;
-            
+           
             // Create custom keyframe animation for each ember
             const keyframes = `
                 @keyframes floatUp {
-                    0% { 
-                        transform: translateY(0) rotate(0deg); 
+                    0% {
+                        transform: translateY(0) rotate(0deg);
                         opacity: 0;
                     }
                     10% { opacity: ${0.3 + Math.random() * 0.5}; }
-                    ${30 + Math.random() * 20}% { 
+                    ${30 + Math.random() * 20}% {
                         transform: translateX(${-50 + Math.random() * 100}px) translateY(-${100 + Math.random() * 200}px) rotate(${Math.random() * 360}deg);
                         opacity: ${0.3 + Math.random() * 0.5};
                     }
-                    ${60 + Math.random() * 20}% { 
+                    ${60 + Math.random() * 20}% {
                         transform: translateX(${-100 + Math.random() * 200}px) translateY(-${300 + Math.random() * 400}px) rotate(${Math.random() * 720}deg);
                         opacity: ${0.1 + Math.random() * 0.3};
                     }
-                    100% { 
+                    100% {
                         transform: translateX(${-200 + Math.random() * 400}px) translateY(-${600 + Math.random() * 200}px) rotate(${Math.random() * 1080}deg);
                         opacity: 0;
                     }
                 }
             `;
-            
+           
             const style = document.createElement('style');
             style.innerHTML = keyframes;
             document.head.appendChild(style);
-            
+           
             emberContainer.appendChild(ember);
         }, i * 300); // Stagger the creation of embers
     }
@@ -1096,36 +1425,36 @@ createEmbers();
 // Add click spark effect to buttons
 function addSparkEffects() {
     document.addEventListener('click', function(e) {
-        if (e.target.tagName === 'BUTTON' || 
-            e.target.classList.contains('dominant-card') || 
+        if (e.target.tagName === 'BUTTON' ||
+            e.target.classList.contains('dominant-card') ||
             e.target.classList.contains('trinket-card') ||
             e.target.classList.contains('meaning-card')) {
-            
+           
             const target = e.target;
             const rect = target.getBoundingClientRect();
-            
+           
             // Calculate click position relative to the element
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
+           
             // Create multiple sparks in a radial pattern
             for (let i = 0; i < 12; i++) {
                 const spark = document.createElement('div');
                 spark.className = 'spark';
-                
+               
                 // Set initial position to the click location
                 spark.style.left = `${x}px`;
                 spark.style.top = `${y}px`;
-                
+               
                 // Calculate direction and distance
                 const angle = (i / 12) * Math.PI * 2;
                 const distance = 30 + Math.random() * 70; // Random distance
                 const duration = 0.5 + Math.random() * 0.5; // Random duration
-                
+               
                 // Calculate end position using polar coordinates
                 const endX = Math.cos(angle) * distance;
                 const endY = Math.sin(angle) * distance;
-                
+               
                 // Apply animation
                 spark.animate([
                     { opacity: 1, transform: 'scale(1) translate(0, 0)' },
@@ -1134,12 +1463,12 @@ function addSparkEffects() {
                     duration: duration * 1000,
                     easing: 'cubic-bezier(0.165, 0.84, 0.44, 1)'
                 });
-                
+               
                 // Remove spark after animation
                 setTimeout(() => {
                     spark.remove();
                 }, duration * 1000);
-                
+               
                 // Append to the clicked element
                 if (target.style.position !== 'static') {
                     target.style.position = 'relative';
@@ -1154,7 +1483,7 @@ addSparkEffects();
 // Add lava flow animation to cards
 function addLavaFlowAnimation() {
     const cards = document.querySelectorAll('.player-control, .mode-toggle, .age-config, .player-meaning-card, .player-trinket-card');
-    
+   
     cards.forEach(card => {
         // Create lava flow element
         const lavaFlow = document.createElement('div');
@@ -1168,7 +1497,7 @@ function addLavaFlowAnimation() {
         lavaFlow.style.zIndex = '0';
         lavaFlow.style.overflow = 'hidden';
         lavaFlow.style.borderRadius = '10px';
-        
+       
         // Create lava stream
         const lavaStream = document.createElement('div');
         lavaStream.style.position = 'absolute';
@@ -1179,7 +1508,7 @@ function addLavaFlowAnimation() {
             radial-gradient(circle at 70% 70%, rgba(255, 70, 30, 0.05) 0%, transparent 50%)
         `;
         lavaStream.style.transform = 'rotate(5deg)';
-        
+       
         // Create animation
         const duration = 15 + Math.random() * 10;
         const keyframes = `
@@ -1189,20 +1518,20 @@ function addLavaFlowAnimation() {
                 100% { transform: rotate(5deg) translateX(-50%) translateY(-50%); }
             }
         `;
-        
+       
         const style = document.createElement('style');
         style.innerHTML = keyframes;
         document.head.appendChild(style);
-        
+       
         lavaStream.style.animation = `lavaStreamAnimation${Math.floor(Math.random() * 1000)} ${duration}s ease-in-out infinite`;
-        
+       
         lavaFlow.appendChild(lavaStream);
-        
+       
         // Set card position to relative if it's not already
         if (card.style.position !== 'relative') {
             card.style.position = 'relative';
         }
-        
+       
         // Add to card
         card.prepend(lavaFlow);
     });
@@ -1212,7 +1541,7 @@ addLavaFlowAnimation();
 // Add heat shimmer effect to rules and dominant displays
 function addHeatShimmer() {
     const elements = document.querySelectorAll('.rule-display, .age-display, .dominant-card');
-    
+   
     elements.forEach(element => {
         // Create heat shimmer element
         const shimmer = document.createElement('div');
@@ -1227,7 +1556,7 @@ function addHeatShimmer() {
         shimmer.style.opacity = '0.7';
         shimmer.style.mixBlendMode = 'overlay';
         shimmer.style.zIndex = '1';
-        
+       
         // Create animation
         const keyframes = `
             @keyframes shimmerAnimation${Math.floor(Math.random() * 1000)} {
@@ -1236,28 +1565,28 @@ function addHeatShimmer() {
                 100% { transform: translateY(0) scale(1); opacity: 0.7; }
             }
         `;
-        
+       
         const style = document.createElement('style');
         style.innerHTML = keyframes;
         document.head.appendChild(style);
-        
+       
         shimmer.style.animation = `shimmerAnimation${Math.floor(Math.random() * 1000)} ${4 + Math.random() * 3}s ease-in-out infinite`;
-        
+       
         // Set element position to relative if it's not already
         if (element.style.position !== 'relative') {
             element.style.position = 'relative';
         }
-        
+       
         // Add to element
         element.appendChild(shimmer);
     });
 }
 addHeatShimmer();
-    
+   
 
 
-      
-      
+     
+     
 // Meaning of Life card data
 // sM represents signMultiplication - a scaling factor based on number of ages
 const meaningOfLifeData = [
@@ -1459,7 +1788,7 @@ const meaningOfLifeData = [
 let playerMeaningCards = {};
 let playerMeaningChoices = {};
 let currentRevealPlayer = null;
-      
+     
       let playerAssignments = {}; // Add these variables at the top of your script
 let nextCardId = 1;
 let cardNameToIdsMap = {}; // Tracks all IDs for each card name
@@ -1467,246 +1796,188 @@ let persistentTierSelections = {}; // Stores permanent tier selections by stable
 
 // Replace these functions completely:
 
-function assignDominant(select, dominantName) {
-  const card = select.closest('.dominant-card');
-  const stableId = card.dataset.stableId;
-  const playerName = select.value;
-  const currentTier = card.dataset.currentTier;
-  
-  // Save the current tier with the stable ID
-  if (currentTier) {
-    persistentTierSelections[stableId] = currentTier;
-  }
-  
-  // Update player assignments using the stable ID
-  if (playerName) {
-    // If assigning to a player, unassign any other cards with the same name from this player
-    Object.keys(playerAssignments).forEach(id => {
-      if (id !== stableId && playerAssignments[id] === playerName) {
-        const cardElement = document.querySelector(`.dominant-card[data-stable-id="${id}"]`);
-        if (cardElement) {
-          const cardName = cardElement.querySelector('.dominant-name').textContent.trim();
-          if (cardName === dominantName) {
-            delete playerAssignments[id];
-          }
-        }
-      }
-    });
-    
-    // Assign this card to the player
-    playerAssignments[stableId] = playerName;
-  } else {
-    // Unassign this card
-    delete playerAssignments[stableId];
-  }
-  
-  // Redraw the list
-  generateDominantList();
-}
+
 
 function generateDominantList() {
-  // First, save all current tier selections
-  document.querySelectorAll('.dominant-card').forEach(card => {
-    const stableId = card.dataset.stableId;
-    const tier = card.dataset.currentTier;
-    if (stableId && tier) {
-      persistentTierSelections[stableId] = tier;
-    }
-  });
-  
   const container = document.getElementById('dominantList');
   container.innerHTML = '';
-  
-  // Reset name-to-IDs mapping to rebuild it
-  cardNameToIdsMap = {};
-  
-  // Prepare arrays for assigned and unassigned cards
+ 
+  // Keep track of count for each card name to create stable IDs
+  const cardCounts = {};
+ 
+  // First identify which cards are assigned to players
   const assignedCards = [];
   const unassignedCards = [];
-  
-  // Process all dominants
+ 
   dominantData.forEach(dom => {
-    // Initialize the array of IDs for this card name if it doesn't exist
-    if (!cardNameToIdsMap[dom.name]) {
-      cardNameToIdsMap[dom.name] = [];
-    }
-    
-    // Create a stable ID for this card instance or use an existing one
-    let stableId;
-    if (cardNameToIdsMap[dom.name].length < dom.count || dom.count === undefined) {
-      // Generate a new stable ID
-      stableId = `${dom.name}-${nextCardId++}`;
-      cardNameToIdsMap[dom.name].push(stableId);
-    } else {
-      // Re-use an existing stable ID for this card name
-      stableId = cardNameToIdsMap[dom.name][cardNameToIdsMap[dom.name].length - 1];
-    }
-    
-    // Check if this card is assigned to a player
-    const player = playerAssignments[stableId];
-    
-    if (player) {
-      assignedCards.push({ card: dom, player, stableId });
-    } else {
-      unassignedCards.push({ card: dom, stableId });
-    }
+      // Ensure we have a counter for this card name
+      if (!cardCounts[dom.name]) {
+          cardCounts[dom.name] = 0;
+      }
+     
+      // Create a stable ID for this card instance
+      const instanceNum = cardCounts[dom.name]++;
+      const cardId = `${dom.name}::${instanceNum}`;
+     
+      // Check if this card is assigned
+      const player = playerAssignments[cardId];
+     
+      if (player) {
+          assignedCards.push({ card: dom, player, stableId: cardId });
+      } else {
+          unassignedCards.push({ card: dom, cardId });
+      }
   });
-  
+ 
   // Sort assigned cards by player name
   assignedCards.sort((a, b) => a.player.localeCompare(b.player));
-  
+ 
   // Sort unassigned cards by name
   unassignedCards.sort((a, b) => a.card.name.localeCompare(b.card.name));
-  
-  // Combine the lists
+ 
+  // Combine sorted lists: assigned first, then unassigned
   const allCards = [...assignedCards, ...unassignedCards];
-  
+ 
   // Render all cards
   allCards.forEach(item => {
-    const dom = item.card;
-    const stableId = item.stableId;
-    const player = item.player || "";
-    
-    const card = document.createElement('div');
-    card.className = 'dominant-card';
-    card.style.borderColor = getNameColor(dom.name);
-    card.dataset.stableId = stableId;
-    
-    // Highlight cards assigned to a player
-    if (player) {
-      card.style.background = `linear-gradient(to right, ${getNameColor(dom.name)}22, transparent)`;
-    }
-    
-    // Restore tier selection if available
-    const storedTier = persistentTierSelections[stableId];
-    
-    if (storedTier) {
-      card.dataset.currentTier = storedTier;
-    }
-    
-    // Create tier select dropdown options
-    const tierSelectOptions = Object.keys(dom.tiers || {}).map(tier => 
-      `<option value="${tier}" ${storedTier === tier ? 'selected' : ''}>Tier ${tier}</option>`
-    ).join('');
-    
-    // Prepare tier display
-    const tierDisplayValue = storedTier || '-';
-    const tierDisplayStyle = storedTier ? 
-      `background: hsl(${130 - (parseInt(storedTier) * 15)}, 70%, 30%);` : '';
-    
-    // Prepare tier description
-    let tierDescription = '';
-    let tierDescriptionStyle = 'display: none;';
-    if (storedTier && dom.tiers && dom.tiers[storedTier]) {
-      tierDescription = dom.tiers[storedTier];
-      tierDescriptionStyle = 'display: block;';
-    }
-    
-    card.innerHTML = `
-      <div class="dominant-name" style="color: ${getNameColor(dom.name)}">
-        ${dom.name}
-      </div>
-      <div class="tier-display" style="${tierDisplayStyle}">${tierDisplayValue}</div>
-      <button class="tier-roll-button" onclick="rollDominantTier(this)">🎲</button>
-      <button class="tier-roll-button" onclick="toggleAllTiers(this, '${dom.name}')">Show All</button>
-      <button class="tier-roll-button" onclick="showTierSelect(this)">Set Tier</button>
-      <select class="tier-select" style="display: none; grid-column: 1 / -1; margin-top: 5px;" onchange="setDominantTier(this)">
-        <option value="">Select Tier</option>
-        ${tierSelectOptions}
-      </select>
-      <select class="player-select" onchange="assignDominant(this, '${dom.name}')">
-        <option value="">Unassigned</option>
-        ${getPlayerNames().map(p => `<option value="${p}" ${p === player ? 'selected' : ''}>${p}</option>`).join('')}
-      </select>
-      <div class="tier-description" style="${tierDescriptionStyle}">${tierDescription}</div>
-    `;
-    container.appendChild(card);
+      const dom = item.card;
+      const cardId = item.stableId || item.cardId;
+      const player = item.player || "";
+     
+      const card = document.createElement('div');
+      card.className = 'dominant-card';
+      card.style.borderColor = getNameColor(dom.name);
+      card.dataset.cardId = cardId; // Store the card ID in the DOM element
+      card.dataset.stableId = cardId; // Also store as stableId for consistency
+     
+      // Highlight cards assigned to a player
+      if (player) {
+          card.style.background = `linear-gradient(to right, ${getNameColor(dom.name)}22, transparent)`;
+      }
+     
+      // Restore tier selection if available
+      const storedTier = persistentTierSelections[cardId];
+     
+      if (storedTier) {
+          card.dataset.currentTier = storedTier;
+      }
+     
+      // Create tier select dropdown options
+      const tierSelectOptions = Object.keys(dom.tiers).map(tier =>
+          `<option value="${tier}" ${storedTier === tier ? 'selected' : ''}>Tier ${tier}</option>`
+      ).join('');
+     
+      card.innerHTML = `
+          <div class" style="color: ${getNameColor(dom.name)}">
+              ${dom.name}
+          </div>
+          <div class="tier-display">${storedTier || '-'}</div>
+          <button class="tier-roll-button" onclick="rollDominantTier(this)">🎲</button>
+          <button class="tier-roll-button" onclick="toggleAllTiers(this, '${dom.name}')">Show All</button>
+          <div class="dominant-button-group">
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Tier:</label>
+              <select class="tier-select" style="width: 100%; margin-bottom: 10px;" onchange="setDominantTier(this)">
+                  <option value="">Select Tier</option>
+                  ${tierSelectOptions}
+              </select>
+              <label style="display: block; margin-bottom: 5px; font-weight: bold;">Player:</label>
+              <select class="player-select" style="width: 100%;" onchange="assignDominant(this, '${dom.name}')">
+                  <option value="">Unassigned</option>
+                  ${getPlayerNames().map(p => `<option value="${p}" ${p === player ? 'selected' : ''}>${p}</option>`).join('')}
+              </select>
+          </div>
+          <div class="tier-description">${storedTier && dom.tiers[storedTier] ? dom.tiers[storedTier] : ''}</div>
+      `;
+      container.appendChild(card);
   });
-}
-
-function rollDominantTier(button) {
-  const weights = { 1: 40, 2: 30, 3: 20, 4: 10, 5: 5 };
-  const total = Object.values(weights).reduce((a, b) => a + b, 0);
-  const random = Math.random() * total;
-  
-  let sum = 0;
-  let tier = 1;
-  for (const [t, weight] of Object.entries(weights)) {
-    sum += weight;
-    if (random <= sum) {
-      tier = parseInt(t);
-      break;
-    }
-  }
-  
-  const card = button.closest('.dominant-card');
-  const stableId = card.dataset.stableId;
-  const domName = card.querySelector('.dominant-name').textContent.trim();
-  const tierDisplay = card.querySelector('.tier-display');
-  const descDisplay = card.querySelector('.tier-description');
-  
-  // Store tier with the stable ID
-  card.dataset.currentTier = tier;
-  persistentTierSelections[stableId] = tier;
-  
-  // Find the matching dominant
-  const dominant = dominantData.find(d => d.name === domName);
-  
-  if (dominant && dominant.tiers && dominant.tiers[tier]) {
-    descDisplay.textContent = dominant.tiers[tier];
-    descDisplay.style.display = 'block';
-    
-    // Reset the "Show All" button if visible
-    const showAllButton = card.querySelector('[onclick^="toggleAllTiers"]');
-    if (showAllButton) {
-      showAllButton.textContent = 'Show All';
-    }
-  } else {
-    descDisplay.textContent = 'Description not available';
-    descDisplay.style.display = 'block';
-  }
-  
-  tierDisplay.textContent = tier;
-  tierDisplay.style.background = `hsl(${130 - (tier * 15)}, 70%, 30%)`;
 }
 
 function setDominantTier(select) {
-  const tier = select.value;
-  if (!tier) return;
-  
-  const card = select.closest('.dominant-card');
-  const stableId = card.dataset.stableId;
-  const domName = card.querySelector('.dominant-name').textContent.trim();
-  const tierDisplay = card.querySelector('.tier-display');
-  const descDisplay = card.querySelector('.tier-description');
-  
-  // Store tier with stable ID
-  card.dataset.currentTier = tier;
-  persistentTierSelections[stableId] = tier;
-  
-  // Find the matching dominant
-  const dominant = dominantData.find(d => d.name === domName);
-  
-  if (dominant && dominant.tiers && dominant.tiers[tier]) {
-    descDisplay.textContent = dominant.tiers[tier];
-    descDisplay.style.display = 'block';
+    const tier = select.value;
+    if (!tier) return;
     
-    // Reset the "Show All" button if visible
-    const showAllButton = card.querySelector('[onclick^="toggleAllTiers"]');
-    if (showAllButton) {
-      showAllButton.textContent = 'Show All';
+    const card = select.closest('.dominant-card');
+    const domName = card.querySelector('.dominant-name').textContent.trim();
+    const tierDisplay = card.querySelector('.tier-display');
+    const descDisplay = card.querySelector('.tier-description');
+    const stableId = card.dataset.stableId;
+    
+    // Store the current tier
+    card.dataset.currentTier = tier;
+    persistentTierSelections[stableId] = tier;
+    
+    // Find the matching dominant
+    const dominant = dominantData.find(d => d.name === domName);
+    
+    if (dominant && dominant.tiers && dominant.tiers[tier]) {
+        descDisplay.textContent = dominant.tiers[tier];
+        descDisplay.style.display = 'block';
+        
+        // Reset the "Show All" button if visible
+        const showAllButton = card.querySelector('[onclick^="toggleAllTiers"]');
+        if (showAllButton) {
+            showAllButton.textContent = 'Show All';
+        }
+    } else {
+        descDisplay.textContent = 'Description not available';
+        descDisplay.style.display = 'block';
     }
-  } else {
-    descDisplay.textContent = 'Description not available';
-    descDisplay.style.display = 'block';
+    
+    tierDisplay.textContent = tier;
+    tierDisplay.style.background = `hsl(${130 - (tier * 15)}, 70%, 30%)`;
+    
+}
+
+function assignDominant(select, dominantName) {
+    const card = select.closest('.dominant-card');
+    const stableId = card.dataset.stableId;
+    const playerName = select.value;
+   
+    // Update player assignments
+    if (playerName) {
+        playerAssignments[stableId] = playerName;
+    } else {
+        delete playerAssignments[stableId];
+    }
+   
+    // No need to regenerate the entire list - this allows players to be changed easily
+    card.style.background = playerName ? 
+        `linear-gradient(to right, ${getNameColor(dominantName)}22, transparent)` : '';
+}
+
+function rollDominantTier(button) {
+  const card = button.closest('.dominant-card');
+  const dominantName = card.getAttribute('data-name');
+  const tierDisplay = card.querySelector('.tier-display');
+  const tierDescription = card.querySelector('.tier-description');
+  
+  const dominant = getDominants().find(d => d.name === dominantName);
+  if (!dominant || !dominant.tiers) return;
+  
+  const tiers = Object.keys(dominant.tiers);
+  if (tiers.length === 0) return;
+  
+  const tier = tiers[Math.floor(Math.random() * tiers.length)];
+  const description = dominant.tiers[tier].description;
+  
+  tierDisplay.innerHTML = `<span style="opacity: 0.7;">Tier:</span> ${tier}`;
+  tierDisplay.style.opacity = '1';
+  
+  tierDescription.textContent = description;
+  tierDescription.style.display = description ? 'block' : 'none';
+  
+  // Update the select element if it exists
+  const tierSelect = card.querySelector('.tier-select');
+  if (tierSelect) {
+    tierSelect.value = tier;
   }
   
-  // Hide the tier select after selection
-  select.style.display = 'none';
-  
-  tierDisplay.textContent = tier;
-  tierDisplay.style.background = `hsl(${130 - (tier * 15)}, 70%, 30%)`;
+  // Update the dominant's tier in the data
+  updateDominantTier(dominantName, tier);
+  updateDominantCounter();
 }
+
+
       // Age setup global variables
       let ageSetup = {
           normalAges: 69,
@@ -1716,30 +1987,30 @@ function setDominantTier(select) {
       };
       let currentAgeDeck = [];
       let currentAgeIndex = 0;
-      
+     
         // Age setup event listeners - add these to your window.onload or initialization code
         document.getElementById('normalSlider').addEventListener('input', function(e) {
             const count = e.target.value;
             document.getElementById('normalCount').textContent = count;
             ageSetup.normalAges = parseInt(count);
         });
-        
+       
         document.getElementById('merchantSlider').addEventListener('input', function(e) {
             const count = e.target.value;
             document.getElementById('merchantCount').textContent = count;
             ageSetup.merchantAges = parseInt(count);
         });
-        
+       
         document.getElementById('catastropheSlider').addEventListener('input', function(e) {
             const count = e.target.value;
             document.getElementById('catastropheCount').textContent = count;
             ageSetup.catastropheAges = parseInt(count);
         });
-        
+       
         document.getElementById('finalCatastropheMode').addEventListener('change', function(e) {
             ageSetup.finalCatastropheAtEnd = e.target.checked;
         });
-      
+     
 // Age data arrays
 const normalAgeData = [
     {
@@ -2202,7 +2473,7 @@ const catastropheAgeData = [
     {
         name: "Great Deluge",
         description: "-1 Gene Pool. Pass all blue cards from your hand right.",
-        worldsEnd: "-4 if you have 2 of fewer blue traits in your trait pile."
+        worldsEnd: "-4 if you have 2 or fewer blue traits in your trait pile."
     },
     {
         name: "Ancient Corruption",
@@ -2212,7 +2483,7 @@ const catastropheAgeData = [
     {
         name: "Ashlands",
         description: "-1 Gene Pool. Discard all purple and blue cards from your hand and stabilize.",
-        worldsEnd: "-4 if you have 2 of fewer purple traits in your trait pile."
+        worldsEnd: "-4 if you have 2 or fewer purple traits in your trait pile."
     },
     {
         name: "Strange Matter",
@@ -2322,7 +2593,7 @@ const catastropheAgeData = [
             5: "• Tier 5: +1 for each trait in your trait pile. Including this one. +30pt."
         }
     },
-    
+   
     // ======================
     // COLORLESS (Sorted A-Z)
     // ======================
@@ -2386,8 +2657,8 @@ const catastropheAgeData = [
             5: "• Tier 5: Attach to any number of traits of a single color. Host traits cannot be removed from your trait pile. You may change your chosen color at the end of each of your turns. +16pt."
         }
     },
-    
-    
+   
+   
     // ======================
     // GREEN (Sorted A-Z)
     // ======================
@@ -2461,7 +2732,7 @@ const catastropheAgeData = [
             5: "• Tier 5: +6 for every trait in your lowest color count. No color requirement. If there's a tie, pick all tied colors. +15pt."
         }
     },
-    
+   
     // ======================
     // PURPLE (Sorted A-Z)
     // ======================
@@ -2515,7 +2786,7 @@ const catastropheAgeData = [
             5: "• Tier 5: At World's End: Opponents receive -4 for each trait in their trait pile. +15pt."
         }
     },
-    
+   
     // ======================
     // RED (Sorted A-Z)
     // ======================
@@ -2609,7 +2880,7 @@ const catastropheAgeData = [
             5: "• Tier 5: At World's End: All opponents reveal their entire hand. Play any five cards immediately; you may use their actions. +18pt."
         }
     },
-    
+   
     // ======================
     // MULTI-COLOR (Sorted A-Z)
     // ======================
@@ -2658,29 +2929,28 @@ const catastropheAgeData = [
 // Updated showSection function
 // Updated showSection function to include trinkets
 function showSection(section) {
-  document.getElementById('challengesSection').style.display = 
+  document.getElementById('challengesSection').style.display =
       section === 'challenges' ? 'block' : 'none';
-  document.getElementById('dominantSection').style.display = 
+  document.getElementById('dominantSection').style.display =
       section === 'dominants' ? 'block' : 'none';
-  document.getElementById('ageSetupSection').style.display = 
+  document.getElementById('ageSetupSection').style.display =
       section === 'ageSetup' ? 'block' : 'none';
-  document.getElementById('meaningOfLifeSection').style.display = 
+  document.getElementById('meaningOfLifeSection').style.display =
       section === 'meaningOfLife' ? 'block' : 'none';
-  document.getElementById('trinketsSection').style.display = 
+  document.getElementById('trinketsSection').style.display =
       section === 'trinkets' ? 'block' : 'none';
-  
+ 
   if (section === 'ageSetup') {
       updateAgeSliders();
   }
 }
 
-// Add this function to initialize the feature
 function initializeMeaningOfLife() {
     // Bind event listeners
     document.getElementById('assignMeaningCards').addEventListener('click', assignMeaningCards);
     document.getElementById('worldsEndButton').addEventListener('click', revealAllMeaningCards);
     document.getElementById('resetMeaningButton').addEventListener('click', resetMeaningCards);
-    
+   
     // Initialize state
     updateMeaningOfLifeSection();
 }
@@ -2688,90 +2958,98 @@ function initializeMeaningOfLife() {
         function generateDominantList() {
           const container = document.getElementById('dominantList');
           container.innerHTML = '';
-          
+         
           // Keep track of count for each card name to create stable IDs
           const cardCounts = {};
-          
+         
           // First identify which cards are assigned to players
           const assignedCards = [];
           const unassignedCards = [];
-          
+         
           dominantData.forEach(dom => {
               // Ensure we have a counter for this card name
               if (!cardCounts[dom.name]) {
                   cardCounts[dom.name] = 0;
               }
-              
+             
               // Create a stable ID for this card instance
               const instanceNum = cardCounts[dom.name]++;
               const cardId = `${dom.name}::${instanceNum}`;
-              
+             
               // Check if this card is assigned
               const player = playerAssignments[cardId];
-              
+             
               if (player) {
-                  assignedCards.push({ card: dom, player, cardId });
+                  assignedCards.push({ card: dom, player, stableId: cardId });
               } else {
                   unassignedCards.push({ card: dom, cardId });
               }
           });
-          
+         
           // Sort assigned cards by player name
           assignedCards.sort((a, b) => a.player.localeCompare(b.player));
-          
+         
           // Sort unassigned cards by name
           unassignedCards.sort((a, b) => a.card.name.localeCompare(b.card.name));
-          
+         
           // Combine sorted lists: assigned first, then unassigned
           const allCards = [...assignedCards, ...unassignedCards];
-          
+         
           // Render all cards
           allCards.forEach(item => {
               const dom = item.card;
               const cardId = item.cardId;
               const player = item.player || "";
-              
+             
               const card = document.createElement('div');
               card.className = 'dominant-card';
               card.style.borderColor = getNameColor(dom.name);
-              card.dataset.cardId = cardId; // Store the stable ID in the DOM element
-              
+              card.dataset.cardId = cardId; // Store the card ID in the DOM element
+             
               // Highlight cards assigned to a player
               if (player) {
                   card.style.background = `linear-gradient(to right, ${getNameColor(dom.name)}22, transparent)`;
               }
-              
+             
+              // Restore tier selection if available
+              const storedTier = persistentTierSelections[cardId];
+             
+              if (storedTier) {
+                  card.dataset.currentTier = storedTier;
+              }
+             
               // Create tier select dropdown options
-              const tierSelectOptions = Object.keys(dom.tiers).map(tier => 
+              const tierSelectOptions = Object.keys(dom.tiers).map(tier =>
                   `<option value="${tier}">Tier ${tier}</option>`
               ).join('');
-              
+             
               card.innerHTML = `
-                  <div class="dominant-name" style="color: ${getNameColor(dom.name)}">
+                  <div class" style="color: ${getNameColor(dom.name)}">
                       ${dom.name}
                   </div>
                   <div class="tier-display">-</div>
                   <button class="tier-roll-button" onclick="rollDominantTier(this)">🎲</button>
                   <button class="tier-roll-button" onclick="toggleAllTiers(this, '${dom.name}')">Show All</button>
-                  <button class="tier-roll-button" onclick="showTierSelect(this)">Set Tier</button>
-                  <select class="tier-select" style="display: none; grid-column: 1 / -1; margin-top: 5px;" onchange="setDominantTier(this)">
-                      <option value="">Select Tier</option>
-                      ${tierSelectOptions}
-                  </select>
-                  <select class="player-select" onchange="assignDominant(this, '${dom.name}')">
-                      <option value="">Unassigned</option>
-                      ${getPlayerNames().map(p => `<option value="${p}" ${p === player ? 'selected' : ''}>${p}</option>`).join('')}
-                  </select>
+                  <div class="dominant-button-group">
+                      <select class="tier-select" onchange="setDominantTier(this)">
+                          <option value="">Tier:</option>
+                          ${tierSelectOptions}
+                      </select>
+                      <select class="player-select" onchange="assignDominant(this, '${dom.name}')">
+                          <option value="">-</option>
+                          ${getPlayerNames().map(p => `<option value="${p}" ${p === player ? 'selected' : ''}>${p}</option>`).join('')}
+                      </select>
+                  </div>
                   <div class="tier-description"></div>
               `;
               container.appendChild(card);
           });
         }
-        
+       
         function showTierSelect(button) {
             const card = button.closest('.dominant-card');
             const tierSelect = card.querySelector('.tier-select');
-            
+           
             // Toggle visibility of the tier select dropdown
             if (tierSelect.style.display === 'none') {
                 tierSelect.style.display = 'block';
@@ -2780,44 +3058,10 @@ function initializeMeaningOfLife() {
             }
         }
 
-        function setDominantTier(select) {
-            const tier = select.value;
-            if (!tier) return; // If no tier selected, do nothing
-            
-            const card = select.closest('.dominant-card');
-            const tierDisplay = card.querySelector('.tier-display');
-            const descDisplay = card.querySelector('.tier-description');
-            const domName = card.querySelector('.dominant-name').textContent.trim();
-            
-            // Store the current tier in the card's dataset
-            card.dataset.currentTier = tier;
-            
-            // Find the matching dominant
-            const dominant = dominantData.find(d => d.name === domName);
-            
-            if (dominant && dominant.tiers && dominant.tiers[tier]) {
-                descDisplay.textContent = dominant.tiers[tier];
-                descDisplay.style.display = 'block';
-                
-                // Reset the "Show All" button if visible
-                const showAllButton = card.querySelector('[onclick^="toggleAllTiers"]');
-                if (showAllButton) {
-                    showAllButton.textContent = 'Show All';
-                }
-            } else {
-                descDisplay.textContent = 'Description not available';
-                descDisplay.style.display = 'block';
-            }
-            
-            // Hide the tier select after selection
-            select.style.display = 'none';
-            
-            tierDisplay.textContent = tier;
-            tierDisplay.style.background = `hsl(${130 - (tier * 15)}, 70%, 30%)`;
-        }
+        
 
         function getNameColor(name) {
-            const hash = Array.from(name).reduce((acc, char) => 
+            const hash = Array.from(name).reduce((acc, char) =>
                 char.charCodeAt(0) + (acc << 5) - acc, 0);
             return `hsl(${Math.abs(hash % 360)}, 70%, 60%)`;
         }
@@ -2826,7 +3070,7 @@ function initializeMeaningOfLife() {
           const weights = { 1: 40, 2: 30, 3: 20, 4: 10, 5: 5 };
           const total = Object.values(weights).reduce((a, b) => a + b, 0);
           const random = Math.random() * total;
-          
+         
           let sum = 0;
           let tier = 1;
           for (const [t, weight] of Object.entries(weights)) {
@@ -2836,22 +3080,28 @@ function initializeMeaningOfLife() {
                   break;
               }
           }
-          
+         
           const card = button.closest('.dominant-card');
           const tierDisplay = card.querySelector('.tier-display');
           const descDisplay = card.querySelector('.tier-description');
           const domName = card.querySelector('.dominant-name').textContent.trim();
-          
+         
           // Store the current tier in the card's dataset
           card.dataset.currentTier = tier;
-          
+         
+          // Store the tier in the appropriate persistent storage
+          const cardId = card.dataset.cardId;
+          if (cardId) {
+              persistentTierSelections[cardId] = tier;
+          }
+         
           // Find the matching dominant
           const dominant = dominantData.find(d => d.name === domName);
-          
+         
           if (dominant && dominant.tiers && dominant.tiers[tier]) {
               descDisplay.textContent = dominant.tiers[tier];
               descDisplay.style.display = 'block';
-              
+             
               // Reset the "Show All" button if visible
               const showAllButton = card.querySelector('[onclick^="toggleAllTiers"]');
               if (showAllButton) {
@@ -2861,15 +3111,15 @@ function initializeMeaningOfLife() {
               descDisplay.textContent = 'Description not available';
               descDisplay.style.display = 'block';
           }
-          
+         
           tierDisplay.textContent = tier;
           tierDisplay.style.background = `hsl(${130 - (tier * 15)}, 70%, 30%)`;
         }
-        
+       
         function toggleAllTiers(button, dominantName) {
           const card = button.closest('.dominant-card');
           const tierDescription = card.querySelector('.tier-description');
-          
+         
           if (button.textContent === 'Show All') {
               const dominant = dominantData.find(d => d.name === dominantName);
               if (dominant && dominant.tiers) {
@@ -2883,7 +3133,7 @@ function initializeMeaningOfLife() {
           } else {
               // Check if there was a previously rolled tier
               const currentTier = card.dataset.currentTier;
-              
+             
               if (currentTier && currentTier !== '-') {
                   // Restore the previously selected tier description
                   const dominant = dominantData.find(d => d.name === dominantName);
@@ -2895,19 +3145,19 @@ function initializeMeaningOfLife() {
                   // No previous tier was rolled, hide the description
                   tierDescription.style.display = 'none';
               }
-              
+             
               button.textContent = 'Show All';
           }
         }
-        
+       
         function updatePlayerSelects() {
             const selects = document.querySelectorAll('.player-select');
             const players = getPlayerNames();
-            
+           
             selects.forEach(select => {
                 const currentValue = select.value;
                 select.innerHTML = `
-                    <option value="">Unassigned</option>
+                    <option value="">Player:</option>
                     ${players.map(p => `
                         <option value="${p}" ${p === currentValue ? 'selected' : ''}>${p}</option>
                     `).join('')}
@@ -2915,31 +3165,7 @@ function initializeMeaningOfLife() {
             });
         }
 
-        function assignDominant(select, dominantName) {
-          const playerName = select.value;
-          const card = select.closest('.dominant-card');
-          const cardId = card.dataset.cardId; // Get stable card ID from the card element
-          
-          // If assigning to a player, make sure only one instance of this card name is assigned to this player
-          if (playerName) {
-              // Remove any existing assignments of this card name to this player
-              Object.keys(playerAssignments).forEach(id => {
-                  const [name, _] = id.split('::');
-                  if (name === dominantName && playerAssignments[id] === playerName && id !== cardId) {
-                      delete playerAssignments[id];
-                  }
-              });
-              
-              // Assign this specific card
-              playerAssignments[cardId] = playerName;
-          } else {
-              // Unassign this specific card
-              delete playerAssignments[cardId];
-          }
-          
-          // Re-sort and redraw the list
-          generateDominantList();
-        }
+        
 
         // =================
         // BASE GAME SYSTEM
@@ -2969,7 +3195,7 @@ function initializeMeaningOfLife() {
         function updateNameInputs(count) {
             const container = document.getElementById('nameInputs');
             container.innerHTML = '';
-            
+           
             for (let i = 1; i <= count; i++) {
                 const input = document.createElement('input');
                 input.type = 'text';
@@ -3000,7 +3226,7 @@ function initializeMeaningOfLife() {
             const isCatastrophe = document.getElementById('catastropheMode').checked;
             const rules = isCatastrophe ? catastropheRules : normalRules;
             const players = getPlayerNames();
-            
+           
             let eligiblePlayers = [...players];
             if (selectionHistory.length >= 2) {
                 const [secondLast, last] = selectionHistory.slice(-2);
@@ -3010,28 +3236,28 @@ function initializeMeaningOfLife() {
             }
 
             if (eligiblePlayers.length === 0) eligiblePlayers = [...players];
-            
+           
             const randomIndex = Math.floor(Math.random() * eligiblePlayers.length);
             const selectedPlayer = eligiblePlayers[randomIndex];
-            
+           
             selectionHistory.push(selectedPlayer);
             if (selectionHistory.length > 2) selectionHistory.shift();
 
             const randomRule = rules[Math.floor(Math.random() * rules.length)];
             const ruleDisplay = document.getElementById('ruleDisplay');
             const playerDisplay = document.getElementById('playerDisplay');
-            
+           
             ruleDisplay.style.animation = 'none';
             void ruleDisplay.offsetWidth;
             ruleDisplay.style.animation = 'fadeIn 0.5s';
-            
+           
             ruleDisplay.textContent = randomRule;
             playerDisplay.textContent = `🎯 ${selectedPlayer}`;
             document.getElementById('catastropheMode').checked = false;
 
             playerDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        
+       
         // Shuffle helper function
         function shuffleArray(array) {
             const shuffled = [...array];
@@ -3041,39 +3267,39 @@ function initializeMeaningOfLife() {
             }
             return shuffled;
         }
-        
+       
 function generateAgeDeck() {
     // Get input values
     const normalAges = ageSetup.normalAges;
     const merchantAges = ageSetup.merchantAges;
     let catastropheAges = ageSetup.catastropheAges;
     const guaranteeEndCatastrophe = ageSetup.finalCatastropheAtEnd;
-    
+   
     // Validate inputs
     if (normalAges + merchantAges + catastropheAges <= 0) {
         alert("Please select at least one age.");
         return;
     }
-    
+   
     // Create arrays of indexes
     let normalIndexes = [...Array(normalAgeData.length).keys()];
-    
+   
     // MODIFICATION: Remove Birth of Life (index 0) from the normal indexes
     normalIndexes.splice(0, 1);
-    
+   
     let merchantIndexes = [...Array(merchantAgeData.length).keys()];
     let catastropheIndexes = [...Array(catastropheAgeData.length).keys()];
-    
+   
     // Shuffle the indexes
     normalIndexes = shuffleArray(normalIndexes);
     merchantIndexes = shuffleArray(merchantIndexes);
     catastropheIndexes = shuffleArray(catastropheIndexes);
-    
+   
     // Select the required number of each age type
     // MODIFICATION: Select one less normal age since Birth of Life will be added manually
     normalIndexes = normalIndexes.slice(0, normalAges - 1);
     merchantIndexes = merchantIndexes.slice(0, merchantAges);
-    
+   
     // Handle guaranteed end catastrophe
     let forcedEndCatastrophe = false;
     let finalCatastropheIndex = null;
@@ -3082,11 +3308,11 @@ function generateAgeDeck() {
         catastropheAges--;
         forcedEndCatastrophe = true;
     }
-    
+   
     // Total regular ages (normal + merchant)
     // MODIFICATION: Subtract 1 from normalAges since Birth of Life is handled separately
     const regularAges = (normalAges - 1) + merchantAges;
-    
+   
     // Calculate minimum required spacing between catastrophes
     let minSpacing = -1;
     if (catastropheAges >= 2) {
@@ -3099,56 +3325,56 @@ function generateAgeDeck() {
             }
         }
     }
-    
+   
     // Create placeholders for all ages (excluding final catastrophe and Birth of Life)
     const totalPositions = regularAges + catastropheAges;
     let ageTypes = new Array(totalPositions).fill(0); // 0 = regular, 2 = catastrophe
-    
+   
     // Randomly place catastrophes with proper spacing
     if (catastropheAges > 0 && minSpacing > 0) {
         // Create array of all positions, excluding the first 3
         let availablePositions = Array.from({length: totalPositions}, (_, i) => i)
             .filter(i => i >= 3); // No catastrophes in first 3 ages
-        
+       
         // If we have a guaranteed end catastrophe, also exclude positions too close to the end
         if (forcedEndCatastrophe) {
             const endPosition = totalPositions;
-            availablePositions = availablePositions.filter(pos => 
+            availablePositions = availablePositions.filter(pos =>
                 Math.abs(pos - endPosition) >= minSpacing);
         }
-        
+       
         // Check if we have enough available positions
         if (availablePositions.length >= catastropheAges) {
             // Place first catastrophe randomly (from valid positions)
             const firstPositionIdx = Math.floor(Math.random() * availablePositions.length);
             const firstPosition = availablePositions[firstPositionIdx];
             ageTypes[firstPosition] = 2; // Mark as catastrophe
-            
+           
             // Keep track of placed catastrophes
             const catastrophePositions = [firstPosition];
-            
+           
             // If we have a final catastrophe, also consider it for spacing
             if (forcedEndCatastrophe) {
                 catastrophePositions.push(totalPositions); // Virtual position of end catastrophe
             }
-            
+           
             // Place remaining catastrophes
             for (let i = 1; i < catastropheAges; i++) {
                 // Get positions that respect minimum spacing from all existing catastrophes
                 let validPositions = availablePositions.filter(pos => {
                     // Position must be at least minSpacing away from all existing catastrophes
-                    return catastrophePositions.every(catPos => 
+                    return catastrophePositions.every(catPos =>
                         Math.abs(pos - catPos) >= minSpacing);
                 });
-                
+               
                 // Remove positions already used
                 validPositions = validPositions.filter(pos => !catastrophePositions.includes(pos));
-                
+               
                 // If we have valid positions, place a catastrophe randomly among them
                 if (validPositions.length > 0) {
                     // Shuffle the valid positions to get real randomness in placement
                     validPositions = shuffleArray(validPositions);
-                    
+                   
                     // Select a random position from valid ones
                     const position = validPositions[0];
                     ageTypes[position] = 2; // Mark as catastrophe
@@ -3158,30 +3384,30 @@ function generateAgeDeck() {
                     break;
                 }
             }
-            
+           
             // If we couldn't place all catastrophes with proper spacing,
             // place remaining ones in best possible positions
             const placedCatastrophes = catastrophePositions.length - (forcedEndCatastrophe ? 1 : 0);
             if (placedCatastrophes < catastropheAges) {
                 // For remaining catastrophes, try to maximize the minimum distance
                 const remainingToPlace = catastropheAges - placedCatastrophes;
-                
+               
                 for (let i = 0; i < remainingToPlace; i++) {
                     // Find all positions not yet used for catastrophes and not in first 3 ages
                     let remainingPositions = Array.from({length: totalPositions}, (_, i) => i)
                         .filter(pos => pos >= 3 && !catastrophePositions.includes(pos));
-                    
+                   
                     if (remainingPositions.length === 0) break;
-                    
+                   
                     // Calculate distances to existing catastrophes
                     let bestScore = -1;
                     let bestPositions = [];
-                    
+                   
                     for (const pos of remainingPositions) {
-                        const distances = catastrophePositions.map(catPos => 
+                        const distances = catastrophePositions.map(catPos =>
                             Math.abs(pos - catPos));
                         const minDistance = Math.min(...distances);
-                        
+                       
                         if (minDistance > bestScore) {
                             bestScore = minDistance;
                             bestPositions = [pos];
@@ -3189,7 +3415,7 @@ function generateAgeDeck() {
                             bestPositions.push(pos);
                         }
                     }
-                    
+                   
                     // Randomly select one of the best positions
                     const position = bestPositions[Math.floor(Math.random() * bestPositions.length)];
                     ageTypes[position] = 2; // Mark as catastrophe
@@ -3200,14 +3426,14 @@ function generateAgeDeck() {
             // Not enough positions respecting all constraints, use standard approach
             const positions = Array.from({length: totalPositions}, (_, i) => i)
                 .filter(i => i >= 3); // No catastrophes in first 3 ages
-                
+               
             // Also avoid too close to end catastrophe if applicable
-            const filteredPositions = forcedEndCatastrophe ? 
-                positions.filter(pos => Math.abs(pos - totalPositions) >= minSpacing) : 
+            const filteredPositions = forcedEndCatastrophe ?
+                positions.filter(pos => Math.abs(pos - totalPositions) >= minSpacing) :
                 positions;
-                
+               
             const shuffledPositions = shuffleArray(filteredPositions.length > 0 ? filteredPositions : positions);
-            
+           
             for (let i = 0; i < Math.min(catastropheAges, shuffledPositions.length); i++) {
                 ageTypes[shuffledPositions[i]] = 2;
             }
@@ -3217,46 +3443,46 @@ function generateAgeDeck() {
         // But still avoid first 3 ages and too close to final catastrophe
         let positions = Array.from({length: totalPositions}, (_, i) => i)
             .filter(i => i >= 3);
-            
+           
         // If we have a guaranteed end catastrophe, also exclude positions too close to the end
         if (forcedEndCatastrophe) {
             const endPosition = totalPositions;
             positions = positions.filter(pos => pos < endPosition - 3);
         }
-        
+       
         const shuffledPositions = shuffleArray(positions);
-        
+       
         for (let i = 0; i < Math.min(catastropheAges, shuffledPositions.length); i++) {
             ageTypes[shuffledPositions[i]] = 2;
         }
     }
-    
+   
     // Distribute merchant ages among normal ages
     const normalPositions = ageTypes
         .map((type, idx) => type === 0 ? idx : -1)
         .filter(idx => idx !== -1);
-    
+   
     // Shuffle the normal positions
     const shuffledNormalPositions = shuffleArray([...normalPositions]);
-    
+   
     // Mark merchant positions (1 = merchant)
     for (let i = 0; i < Math.min(merchantAges, shuffledNormalPositions.length); i++) {
         ageTypes[shuffledNormalPositions[i]] = 1;
     }
-    
+   
     // Generate the final age data
     currentAgeDeck = [];
-    
+   
     // MODIFICATION: Add Birth of Life as the first age
     currentAgeDeck.push({
         type: 'normal',
         index: 0  // Birth of Life is at index 0
     });
-    
+   
     let normalCount = 0;
     let merchantCount = 0;
     let catastropheCount = 0;
-    
+   
     for (let i = 0; i < ageTypes.length; i++) {
         switch (ageTypes[i]) {
             case 0: // Normal age
@@ -3288,7 +3514,7 @@ function generateAgeDeck() {
                 break;
         }
     }
-    
+   
     // Add the final catastrophe if needed
     if (forcedEndCatastrophe) {
         currentAgeDeck.push({
@@ -3297,13 +3523,13 @@ function generateAgeDeck() {
             isFinal: true
         });
     }
-    
+   
     // Reset to first age
     currentAgeIndex = 0;
     displayCurrentAge();
     scrollToCurrentAge();
 }
-                
+               
         // Display the current age
         function displayCurrentAge() {
             if (currentAgeDeck.length === 0) {
@@ -3311,17 +3537,17 @@ function generateAgeDeck() {
                 document.getElementById('ageCounter').textContent = '';
                 return;
             }
-            
+           
             if (currentAgeIndex >= currentAgeDeck.length) {
                 document.getElementById('ageDisplay').innerHTML = '<strong>Game Over!</strong><br>All ages have been played.';
                 document.getElementById('ageCounter').textContent = `${currentAgeIndex}/${currentAgeDeck.length}`;
                 return;
             }
-            
+           
             const currentAge = currentAgeDeck[currentAgeIndex];
             let ageContent = '';
             let ageTypeEmoji = '';
-            
+           
             switch (currentAge.type) {
                 case 'normal':
                     const normalAge = normalAgeData[currentAge.index];
@@ -3331,7 +3557,7 @@ function generateAgeDeck() {
                         ${normalAge.description}
                     `;
                     break;
-                    
+                   
                 case 'merchant':
                     const merchantAge = merchantAgeData[currentAge.index];
                     ageTypeEmoji = '💰';
@@ -3340,12 +3566,12 @@ function generateAgeDeck() {
                         ${merchantAge.description}
                     `;
                     break;
-                    
+                   
                 case 'catastrophe':
                     const catastropheAge = catastropheAgeData[currentAge.index];
                     ageTypeEmoji = '☠️';
                     let finalWarning = currentAge.isFinal ? '<br><br><strong style="color: red;">FINAL CATASTROPHE - THIS ENDS THE GAME!</strong>' : '';
-                    
+                   
                     ageContent = `
                         <strong style="color: var(--accent2);">${ageTypeEmoji} CATASTROPHE AGE: ${catastropheAge.name}</strong>${finalWarning}<br><br>
                         ${catastropheAge.description}<br><br>
@@ -3354,44 +3580,44 @@ function generateAgeDeck() {
                     `;
                     break;
             }
-            
+           
             document.getElementById('ageDisplay').innerHTML = ageContent;
             document.getElementById('ageCounter').textContent = `Age ${currentAgeIndex + 1}/${currentAgeDeck.length}`;
-            
+           
             scrollToCurrentAge();
         }
-        
+       
         // Navigate to the next age
         function nextAge() {
             if (currentAgeDeck.length === 0) return;
-            
+           
             if (currentAgeIndex < currentAgeDeck.length) {
                 currentAgeIndex++;
                 displayCurrentAge();
             }
         }
-        
+       
         // Navigate to the previous age
         function previousAge() {
             if (currentAgeDeck.length === 0) return;
-            
+           
             if (currentAgeIndex > 0) {
                 currentAgeIndex--;
                 displayCurrentAge();
             }
         }
-        
+       
         function updateAgeSliders() {
     // Update normal ages slider
     document.getElementById('normalCount').textContent = ageSetup.normalAges;
     document.getElementById('normalSlider').value = ageSetup.normalAges;
     document.getElementById('normalSlider').max = normalAgeData.length;
-    
+   
     // Update merchant ages slider
     document.getElementById('merchantCount').textContent = ageSetup.merchantAges;
     document.getElementById('merchantSlider').value = ageSetup.merchantAges;
     document.getElementById('merchantSlider').max = merchantAgeData.length;
-    
+   
     // Update catastrophe ages slider
     document.getElementById('catastropheCount').textContent = ageSetup.catastropheAges;
     document.getElementById('catastropheSlider').value = ageSetup.catastropheAges;
@@ -3402,7 +3628,7 @@ function generateAgeDeck() {
 function scrollToCurrentAge() {
     // Get the element that displays the current age
     const ageDisplay = document.getElementById('current-age-display');
-    
+   
     // If the element exists, scroll to it
     if (ageDisplay) {
         ageDisplay.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -3486,7 +3712,7 @@ function initializeTrinkets() {
   document.getElementById('assignTrinkets').addEventListener('click', assignTrinkets);
   document.getElementById('worldsEndTrinketButton').addEventListener('click', showTrinketScores);
   document.getElementById('resetTrinketsButton').addEventListener('click', resetTrinkets);
-  
+ 
   // Initialize state
   resetTrinkets();
 }
@@ -3494,21 +3720,21 @@ function initializeTrinkets() {
 function updateTrinketSection() {
   const playerTrinketsContainer = document.getElementById('playerTrinkets');
   playerTrinketsContainer.innerHTML = '';
-  
+ 
   const players = getPlayerNames();
-  
+ 
   if (Object.keys(playerTrinkets).length === 0) {
     playerTrinketsContainer.innerHTML = '<div class="status-message">Click "Assign Trinkets" to start.</div>';
     return;
   }
-  
+ 
   players.forEach(player => {
     const playerCard = document.createElement('div');
     playerCard.className = 'player-trinket-card';
-    
+   
     const trinkets = playerTrinkets[player] || [];
     const score = playerTrinketScores[player] || 0;
-    
+   
     // Create player header
     const playerHeader = document.createElement('div');
     playerHeader.className = 'player-trinket-header';
@@ -3517,16 +3743,16 @@ function updateTrinketSection() {
       <span class="trinket-score">Score: ${score}</span>
     `;
     playerCard.appendChild(playerHeader);
-    
+   
     // Create trinkets container
     const trinketsContainer = document.createElement('div');
     trinketsContainer.className = 'trinkets-container';
-    
+   
     if (trinkets.length > 0) {
       trinkets.forEach((trinket, index) => {
         const trinketElement = document.createElement('div');
         trinketElement.className = 'trinket-card';
-        
+       
         trinketElement.innerHTML = `
           <div class="trinket-name">${trinket.name}</div>
           <div class="trinket-power"><strong>Power:</strong> ${trinket.power}</div>
@@ -3554,11 +3780,11 @@ function updateTrinketSection() {
       `;
       trinketsContainer.appendChild(emptyCard);
     }
-    
+   
     playerCard.appendChild(trinketsContainer);
     playerTrinketsContainer.appendChild(playerCard);
   });
-  
+ 
   updateTrinketStatus();
 }
 
@@ -3566,35 +3792,35 @@ function updateTrinketStatus() {
   const statusElement = document.getElementById('trinketStatus');
   const players = getPlayerNames();
   const availableCount = availableTrinkets.length;
-  
+ 
   if (Object.keys(playerTrinkets).length === 0) {
     statusElement.textContent = `Ready to assign trinkets to ${players.length} players. ${availableCount} trinkets available.`;
     return;
   }
-  
+ 
   statusElement.textContent = `${availableCount} trinkets available. Use add/remove/pocket to manage your trinkets.`;
 }
 
 // Function to assign initial trinkets to all players
 function assignTrinkets() {
   const players = getPlayerNames();
-  
+ 
   // Check if any players already have trinkets
-  const playersWithTrinkets = Object.keys(playerTrinkets).some(player => 
+  const playersWithTrinkets = Object.keys(playerTrinkets).some(player =>
     playerTrinkets[player] && playerTrinkets[player].length > 0
   );
-  
+ 
   if (playersWithTrinkets) {
     alert("Some players already have trinkets. You need to reset trinkets first before reassigning.");
     return;
   }
-  
+ 
   // Reset state
   resetTrinkets();
-  
+ 
   // Shuffle available trinkets initially
   availableTrinkets.sort(() => Math.random() - 0.5);
-  
+ 
   // Assign 2 trinkets to each player from the top of the deck
   players.forEach(player => {
     if (availableTrinkets.length >= 2) {
@@ -3607,22 +3833,22 @@ function assignTrinkets() {
       alert("Not enough trinkets available!");
     }
   });
-  
+ 
   // Update UI
   updateTrinketSection();
 }
 
 function addTrinket(playerName, trinketIndex) {
   const currentTrinkets = playerTrinkets[playerName] || [];
-  
+ 
   // If 2 trinkets, handle the special case first (keep one, return the other)
   if (currentTrinkets.length === 2) {
     // Find the index of the "other" trinket (the one NOT clicked)
     const otherIndex = trinketIndex === 0 ? 1 : 0;
-    
+   
     // Return the other trinket to the bottom of the deck
     availableTrinkets.push(currentTrinkets[otherIndex]);
-    
+   
     // Keep only the current trinket
     playerTrinkets[playerName] = [currentTrinkets[trinketIndex]];
   }
@@ -3642,59 +3868,59 @@ function addTrinket(playerName, trinketIndex) {
     currentTrinkets.push(newTrinket);
     playerTrinkets[playerName] = currentTrinkets;
   }
-  
+ 
   // Update UI
   updateTrinketSection();
 }
 
 function removeTrinket(playerName, trinketIndex) {
   const currentTrinkets = playerTrinkets[playerName] || [];
-  
+ 
   if (currentTrinkets.length === 0) {
     return;
   }
-  
+ 
   // Return the trinket to the bottom of the deck
   availableTrinkets.push(currentTrinkets[trinketIndex]);
-  
+ 
   // Remove that specific trinket
   currentTrinkets.splice(trinketIndex, 1);
   playerTrinkets[playerName] = currentTrinkets;
-  
+ 
   // If player now has 0 trinkets and there are available trinkets,
   // automatically add a new one from the top
   if (currentTrinkets.length === 0 && availableTrinkets.length > 0) {
     addTrinket(playerName, 0);
     return; // addTrinket will call updateTrinketSection
   }
-  
+ 
   // Update UI
   updateTrinketSection();
 }
 
 function pocketTrinket(playerName, trinketIndex) {
   const currentTrinkets = playerTrinkets[playerName] || [];
-  
+ 
   if (currentTrinkets.length === 0 || trinketIndex >= currentTrinkets.length) {
     alert("No trinket to pocket!");
     return;
   }
-  
+ 
   // Add trinket's points to the player's score
   const trinket = currentTrinkets[trinketIndex];
   playerTrinketScores[playerName] = (playerTrinketScores[playerName] || 0) + trinket.points;
-  
+ 
   // Remove the trinket from the player (don't return it to the pool)
   currentTrinkets.splice(trinketIndex, 1);
   playerTrinkets[playerName] = currentTrinkets;
-  
+ 
   // If player now has 0 trinkets and there are available trinkets,
   // automatically add a new one from the top
   if (currentTrinkets.length === 0 && availableTrinkets.length > 0) {
     addTrinket(playerName, 0);
     return; // addTrinket will call updateTrinketSection
   }
-  
+ 
   // Update UI
   updateTrinketSection();
 }
@@ -3703,12 +3929,12 @@ function pocketTrinket(playerName, trinketIndex) {
 function showTrinketScores() {
   const players = getPlayerNames();
   let scoreDisplay = '<h3>World\'s End Trinket Scores</h3>';
-  
+ 
   players.forEach(player => {
       const score = playerTrinketScores[player] || 0;
       scoreDisplay += `<div class="player-score"><strong>${player}:</strong> ${score} points</div>`;
   });
-  
+ 
   // Display the scores in the status area
   const statusElement = document.getElementById('trinketStatus');
   statusElement.innerHTML = scoreDisplay;
@@ -3725,22 +3951,22 @@ function resetTrinkets() {
 function updateMeaningOfLifeSection() {
     const playerCardsContainer = document.getElementById('playerMeaningCards');
     playerCardsContainer.innerHTML = '';
-    
+   
     const players = getPlayerNames();
-    
+   
     if (Object.keys(playerMeaningCards).length === 0) {
         playerCardsContainer.innerHTML = '<div class="status-message">Click "Assign Meaning of Life Cards" to start.</div>';
         return;
     }
-    
+   
     players.forEach(player => {
         const playerCard = document.createElement('div');
         playerCard.className = 'player-meaning-card';
-        
+       
         const cards = playerMeaningCards[player] || [];
         const chosenCardIndex = playerMeaningChoices[player];
         const isRevealed = currentRevealPlayer === player;
-        
+       
         // Create player header
         const playerHeader = document.createElement('div');
         playerHeader.className = 'player-meaning-header';
@@ -3751,27 +3977,27 @@ function updateMeaningOfLifeSection() {
             </button>
         `;
         playerCard.appendChild(playerHeader);
-        
+       
         // Create cards container
         const cardsContainer = document.createElement('div');
         cardsContainer.className = 'meaning-cards-container';
         cardsContainer.style.display = isRevealed ? 'flex' : 'none';
-        
+       
         if (cards.length > 0) {
             cards.forEach((card, index) => {
                 const cardElement = document.createElement('div');
                 cardElement.className = 'meaning-card';
-                
+               
                 // Add selected class if this card is chosen
                 if (chosenCardIndex === index) {
                     cardElement.classList.add('selected-card');
                 }
-                
+               
                 cardElement.innerHTML = `
                     <div class="meaning-card-name">${card.name}</div>
                     <div class="meaning-card-desc">${card.description}</div>
-                    ${chosenCardIndex === undefined ? 
-                        `<button class="choose-card-btn" onclick="chooseCard('${player}', ${index})">Choose</button>` : 
+                    ${chosenCardIndex === undefined ?
+                        `<button class="choose-card-btn" onclick="chooseCard('${player}', ${index})">Choose</button>` :
                         ''}
                 `;
                 cardsContainer.appendChild(cardElement);
@@ -3779,11 +4005,11 @@ function updateMeaningOfLifeSection() {
         } else {
             cardsContainer.innerHTML = '<div class="no-cards">No cards assigned yet</div>';
         }
-        
+       
         playerCard.appendChild(cardsContainer);
         playerCardsContainer.appendChild(playerCard);
     });
-    
+   
 // At the end of your updateMeaningOfLifeSection function, add:
 updateMeaningCardStatus();
 
@@ -3799,12 +4025,12 @@ function updateMeaningCardStatus() {
     const players = getPlayerNames();
     const totalPlayers = players.length;
     const playersWithChoices = Object.keys(playerMeaningChoices).length;
-    
+   
     if (Object.keys(playerMeaningCards).length === 0) {
         statusElement.textContent = `Ready to assign cards to ${totalPlayers} players.`;
         return;
     }
-    
+   
     statusElement.textContent = `${playersWithChoices}/${totalPlayers} players have chosen their Meaning of Life.`;
 }
 
@@ -3814,36 +4040,36 @@ function updateMeaningCardStatus() {
 function calculateScalingMultiplier() {
     // Get total number of ages
     const totalAges = ageSetup.normalAges + ageSetup.merchantAges + ageSetup.catastropheAges;
-    
+   
     // Calculate scaling multiplier (total ages / 20)
     // 20 is considered the average number of ages in a normal game
     const sM = Math.max(1, totalAges / 20);
-    
+   
     return sM;
 }
 
 // Function to process Meaning of Life card descriptions with the scaling multiplier
 function processCardDescriptions() {
     const sM = calculateScalingMultiplier();
-    
+   
     // Create a deep copy of the original data
     const processedCards = JSON.parse(JSON.stringify(meaningOfLifeData));
-    
+   
     // Process each card's description
     processedCards.forEach(card => {
         // Replace all instances of "sM" or "X*sM" or "sM*X" with calculated values
         card.description = card.description.replace(/(\d+)\*sM/g, (match, number) => {
             return Math.round(parseInt(number) * sM);
         });
-        
+       
         card.description = card.description.replace(/sM\*(\d+)/g, (match, number) => {
             return Math.round(parseInt(number) * sM);
         });
-        
+       
         // Replace standalone "sM" with the calculated value
         card.description = card.description.replace(/\bsM\b/g, Math.round(sM));
     });
-    
+   
     return processedCards;
 }
 
@@ -3853,30 +4079,30 @@ function assignMeaningCards() {
     const processedCards = processCardDescriptions();
     const totalCards = processedCards.length;
     const requiredCards = players.length * 2;
-    
+   
     if (totalCards < requiredCards) {
         alert(`Not enough Meaning of Life cards! You need at least ${requiredCards} cards for ${players.length} players, but only have ${totalCards}.`);
         return;
     }
-    
+   
     // Display the scaling multiplier
     const sM = calculateScalingMultiplier();
     const statusElement = document.getElementById('meaningCardStatus');
     statusElement.innerHTML = `<strong>Scaling Multiplier:</strong> ${sM.toFixed(2)}x (based on ${ageSetup.normalAges + ageSetup.merchantAges + ageSetup.catastropheAges} total ages)`;
-    
+   
     playerMeaningCards = {};
     playerMeaningChoices = {};
     currentRevealPlayer = null;
-    
+   
     const shuffledCards = [...processedCards].sort(() => Math.random() - 0.5);
-    
+   
     players.forEach((player, index) => {
         playerMeaningCards[player] = [
             shuffledCards[index * 2],
             shuffledCards[index * 2 + 1]
         ];
     });
-    
+   
     // Update the UI
     updateMeaningOfLifeSection();
 }
@@ -3884,17 +4110,17 @@ function assignMeaningCards() {
 // Add a button to the age setup section to show the current scaling multiplier
 function addScalingMultiplierDisplay() {
     const ageConfig = document.querySelector('.age-config');
-    
+   
     const smDisplay = document.createElement('div');
     smDisplay.className = 'status-display';
     smDisplay.id = 'scalingMultiplierDisplay';
     smDisplay.style.marginTop = '1rem';
-    
+   
     const sM = calculateScalingMultiplier();
     smDisplay.innerHTML = `<strong>Meaning of Life Scaling:</strong> ${sM.toFixed(2)}x`;
-    
+   
     ageConfig.appendChild(smDisplay);
-    
+   
     // Update the display whenever sliders change
     document.getElementById('normalSlider').addEventListener('input', updateScalingDisplay);
     document.getElementById('merchantSlider').addEventListener('input', updateScalingDisplay);
@@ -3921,25 +4147,25 @@ function toggleRevealForPlayer(playerName) {
     if (currentRevealPlayer === playerName) {
         // Hide the cards
         currentRevealPlayer = null;
-        
+       
         // Find the next player who hasn't revealed yet
         highlightPlayers();
         updateMeaningOfLifeSection();
         return;
     }
-    
+   
     // If we're revealing a new player's cards
     if (currentRevealPlayer !== null) {
         const previousPlayer = currentRevealPlayer;
-        
-        if (playerMeaningChoices[previousPlayer] === undefined && 
-            playerMeaningCards[previousPlayer] && 
+       
+        if (playerMeaningChoices[previousPlayer] === undefined &&
+            playerMeaningCards[previousPlayer] &&
             playerMeaningCards[previousPlayer].length > 0) {
             alert(`${previousPlayer} must choose a Meaning of Life card before proceeding.`);
             return;
         }
     }
-    
+   
     // Set the new player to reveal
     currentRevealPlayer = playerName;
     updateMeaningOfLifeSection();
@@ -3949,7 +4175,7 @@ function toggleRevealForPlayer(playerName) {
 function chooseCard(playerName, cardIndex) {
     playerMeaningChoices[playerName] = cardIndex;
     updateMeaningOfLifeSection();
-    
+   
     setTimeout(() => {
         if (currentRevealPlayer === playerName) {
             toggleRevealForPlayer(playerName);
@@ -3960,19 +4186,19 @@ function chooseCard(playerName, cardIndex) {
 // Function to reveal all cards at World's End
 function revealAllMeaningCards() {
     const playerCardsContainer = document.getElementById('playerMeaningCards');
-    
+   
     const playerCardElements = playerCardsContainer.querySelectorAll('.player-meaning-card');
     playerCardElements.forEach(card => {
         const cardsContainer = card.querySelector('.meaning-cards-container');
         cardsContainer.style.display = 'flex';
-        
+       
         const chooseButtons = cardsContainer.querySelectorAll('.choose-card-btn');
         chooseButtons.forEach(btn => btn.style.display = 'none');
     });
-    
+   
     const revealButtons = playerCardsContainer.querySelectorAll('.reveal-button');
     revealButtons.forEach(btn => btn.disabled = true);
-    
+   
     const statusElement = document.getElementById('meaningCardStatus');
     statusElement.innerHTML = '<strong style="color: var(--accent2);">WORLD\'S END!</strong> All Meaning of Life cards are revealed.';
 }
@@ -3993,15 +4219,15 @@ function highlightPlayers() {
     revealButtons.forEach(btn => {
         btn.classList.remove('next-player-highlight');
     });
-    
+   
     // Find players who haven't made a choice yet
     const players = getPlayerNames();
-    const playersWithoutChoice = players.filter(player => 
-        playerMeaningCards[player] && 
-        playerMeaningCards[player].length > 0 && 
+    const playersWithoutChoice = players.filter(player =>
+        playerMeaningCards[player] &&
+        playerMeaningCards[player].length > 0 &&
         playerMeaningChoices[player] === undefined
     );
-    
+   
     if (playersWithoutChoice.length > 0) {
         // Highlight ALL players who haven't made a choice yet
         const playerCards = document.querySelectorAll('.player-meaning-card');
@@ -4023,6 +4249,82 @@ function switchToChallengePage() {
     document.getElementById('meaningOfLifeSection').style.display = 'none';
     document.getElementById('trinketsSection').style.display = 'none';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Create the phoenix logo
+  const phoenixLogo = document.createElement('div');
+  phoenixLogo.className = 'phoenix-logo';
+ 
+  // Add logo elements
+  phoenixLogo.innerHTML = `
+    <div class="phoenix-image"></div>
+    <div class="logo-text">
+      <h1>DOOMLINGS</h1>
+      <h2>COMPANION</h2>
+    </div>
+  `;
+ 
+  // Insert the logo at the top of the container
+  const container = document.querySelector('.container');
+  const nav = container.querySelector('.nav');
+  container.insertBefore(phoenixLogo, nav);
+ 
+  // Add the CSS to the head
+  const style = document.createElement('style');
+  style.textContent = `
+    .phoenix-logo {
+      position: relative;
+      width: 100%;
+      max-width: 350px;
+      height: 120px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(255, 60, 0, 0.3), 0 0 30px rgba(0, 150, 200, 0.2);
+    }
+   
+    .phoenix-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('file-UBtxsYSrz61TyuEGnkTdb1.webp');
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+    }
+   
+    .logo-text {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      text-align: center;
+      z-index: 2;
+    }
+   
+    .logo-text h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent1);
+      text-shadow: 0 0 10px rgba(255, 60, 0, 0.8);
+    }
+   
+    .logo-text h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--text);
+      letter-spacing: 2px;
+    }
+  `;
+  document.head.appendChild(style);
+});
+
         // Initialize
         updateNameInputs(2);
         generateDominantList();
@@ -4031,7 +4333,8 @@ function switchToChallengePage() {
         initializeMeaningOfLife();
         initializeTrinkets();
         switchToChallengePage();
-        
+       
     </script>
 </body>
 </html>
+
