@@ -355,6 +355,7 @@ section:not(.active-section) {
         grid-template-rows: 1fr;
         max-width: 800px;
         margin: 0 auto 20px;
+        margin-left: 20%;
     }
    
     .nav > .nav-button:nth-child(1),
@@ -373,8 +374,6 @@ section:not(.active-section) {
     content: "";
     position: absolute;
     bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
     width: 80%;
     height: 2px;
     background: linear-gradient(90deg,
@@ -385,6 +384,14 @@ section:not(.active-section) {
         transparent);
     opacity: 0.7;
     border-radius: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@media (min-width: 768px) {
+    .nav::before {
+        left: 30%; 
+    }
 }
 
 .nav > .nav-button {
