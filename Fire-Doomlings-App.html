@@ -110,7 +110,7 @@
 }
 
 body {
-    background: url('fire_water_background.png') no-repeat center center;
+    background: red no-repeat center center;
     background-size: 150%;
     background-attachment: fixed;
     color: var(--text);
@@ -119,10 +119,13 @@ body {
     overflow-x: hidden;
     position: relative;
     z-index: 0; /* Base layer */
+    margin: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Pattern overlay */
-body::before {
+before {
     content: "";
     position: fixed;
     top: 0;
@@ -159,6 +162,7 @@ body::after {
     padding: 0.5rem;
     position: relative;
     z-index: 1;
+    flex: 1;
 }
 
 /* Responsive container width for larger screens */
