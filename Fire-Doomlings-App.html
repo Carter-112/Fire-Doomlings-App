@@ -5,6 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
     <style>
+    /* Button Animation Styles */
+.button-ripple {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.pulse-animation {
+  animation: pulse 0.3s ease;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+.bounce-animation {
+  animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+  0% { transform: scale(1); }
+  30% { transform: scale(0.8); }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.slide-animation {
+  animation: slide 0.3s ease;
+}
+
+@keyframes slide {
+  0% { transform: translateX(0); }
+  30% { transform: translateX(-3px); }
+  60% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+
+.glow-animation {
+  animation: glow 0.8s ease;
+}
+
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(255, 120, 0, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(255, 160, 0, 0.8), 0 0 30px rgba(255, 100, 0, 0.6); }
+  100% { box-shadow: 0 0 5px rgba(255, 120, 0, 0.5); }
+}
+
+.spark-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10;
+}
+    
     
 .tier-select, .player-select {
     background-color: #FF7733; /* Medium gray */
@@ -1409,6 +1478,159 @@ button::after {
 
 
     <script>
+      // Button Animation Functions
+function createRippleEffect(event) {
+  const button = event.currentTarget;
+  
+  const ripple = document.createElement('span');
+  ripple.className = 'button-ripple';
+  
+  const rect = button.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  
+  ripple.style.left = `${x}px`;
+  ripple.style.top = `${y}px`;
+  button.appendChild(ripple);
+  
+  setTimeout(() => {
+    ripple.remove();
+  }, 600);
+}
+
+function addPulseEffect(button) {
+  button.classList.add('pulse-animation');
+  setTimeout(() => {
+    button.classList.remove('pulse-animation');
+  }, 300);
+}
+
+function addBounceEffect(button) {
+  button.classList.add('bounce-animation');
+  setTimeout(() => {
+    button.classList.remove('bounce-animation');
+  }, 500);
+}
+
+function addSlideEffect(button) {
+  button.classList.add('slide-animation');
+  setTimeout(() => {
+    button.classList.remove('slide-animation');
+  }, 300);
+}
+
+function addGlowEffect(button) {
+  button.classList.add('glow-animation');
+  setTimeout(() => {
+    button.classList.remove('glow-animation');
+  }, 800);
+}
+
+function createSparkEffect(event) {
+  const button = event.currentTarget;
+  const rect = button.getBoundingClientRect();
+  
+  for (let i = 0; i < 8; i++) {
+    const spark = document.createElement('span');
+    spark.className = 'spark-particle';
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 10 + Math.random() * 20;
+    const x = rect.width/2 + Math.cos(angle) * distance;
+    const y = rect.height/2 + Math.sin(angle) * distance;
+    
+    spark.style.left = `${x}px`;
+    spark.style.top = `${y}px`;
+    
+    // Fire color scheme based on button type
+    const fireColors = button.classList.contains('nav-button') && 
+                      button.textContent.includes('Challenges') || 
+                      button.textContent.includes('Age') ? 
+                      ['#29aeff', '#40b9fe', '#0a3d68', '#1da1f2'] : 
+                      ['#ff6a00', '#ffcc30', '#ff3838', '#ffbc3b'];
+                      
+    const color = fireColors[Math.floor(Math.random() * fireColors.length)];
+    spark.style.backgroundColor = color;
+    spark.style.boxShadow = `0 0 6px 2px ${color}`;
+    
+    button.appendChild(spark);
+    
+    spark.animate([
+      { transform: 'scale(1) translate(0, 0)', opacity: 1 },
+      { transform: `scale(0) translate(${(Math.random() - 0.5) * 100}px, ${(Math.random() - 0.5) * 100}px)`, opacity: 0 }
+    ], {
+      duration: 500 + Math.random() * 300,
+      easing: 'cubic-bezier(0.2, 0.9, 0.3, 1)'
+    });
+    
+    setTimeout(() => {
+      spark.remove();
+    }, 800);
+  }
+}
+
+function initializeButtonAnimations() {
+  // Standard buttons
+  document.querySelectorAll('button:not(.nav-button):not(.tier-roll-button):not(.show-all-button):not(.add-btn):not(.remove-btn):not(.pocket-btn):not(.reveal-button)').forEach(button => {
+    button.addEventListener('click', (event) => {
+      createRippleEffect(event);
+      addPulseEffect(button);
+      createSparkEffect(event);
+    });
+  });
+  
+  // Navigation buttons
+  document.querySelectorAll('.nav-button').forEach(button => {
+    button.addEventListener('click', (event) => {
+      addSlideEffect(button);
+      createSparkEffect(event);
+    });
+  });
+  
+  // Small buttons
+  document.querySelectorAll('.tier-roll-button, .show-all-button').forEach(button => {
+    button.addEventListener('click', (event) => {
+      addBounceEffect(button);
+      createSparkEffect(event);
+    });
+  });
+  
+  // Trinket buttons
+  document.querySelectorAll('.add-btn, .remove-btn, .pocket-btn').forEach(button => {
+    button.addEventListener('click', (event) => {
+      createRippleEffect(event);
+      addBounceEffect(button);
+    });
+  });
+  
+  // Special buttons
+  document.querySelectorAll('#worldsEndButton, #worldsEndTrinketButton, #assignMeaningCards, #assignTrinkets').forEach(button => {
+    button.addEventListener('click', (event) => {
+      addGlowEffect(button);
+      createSparkEffect(event);
+    });
+  });
+  
+  // Reveal buttons
+  document.querySelectorAll('.reveal-button').forEach(button => {
+    button.addEventListener('click', (event) => {
+      addPulseEffect(button);
+    });
+  });
+}
+
+// Initialize animations when page loads
+document.addEventListener('DOMContentLoaded', initializeButtonAnimations);
+
+// Call this function after any dynamic button creation
+function refreshButtonAnimations() {
+  initializeButtonAnimations();
+}
+
+// Add this call at the end of functions that create buttons dynamically
+// For example, after generateDominantList(), updateNameInputs(), etc.
+refreshButtonAnimations();
+      
 // Create ember container
 const emberContainer = document.createElement('div');
 emberContainer.id = 'ember-container';
