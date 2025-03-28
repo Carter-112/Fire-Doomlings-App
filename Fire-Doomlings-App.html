@@ -2429,6 +2429,28 @@ let persistentTierSelections = {}; // Stores permanent tier selections by stable
 // Replace these functions completely:
 
 
+function assignDominant(select, dominantName) {
+    const card = select.closest('.dominant-card');
+    const stableId = card.dataset.stableId;
+    const playerName = select.value;
+   
+    // Update player assignments
+    if (playerName) {
+        playerAssignments[stableId] = playerName;
+    } else {
+        delete playerAssignments[stableId];
+    }
+   
+    // Save to localStorage (if this wasn't already being done elsewhere)
+    localStorage.setItem('playerAssignments', JSON.stringify(playerAssignments));
+    
+    // First update visual indicator for immediate feedback
+    card.style.background = playerName ? 
+        `linear-gradient(to right, ${getNameColor(dominantName)}22, transparent)` : '';
+    
+    // Then regenerate the list to apply the sorting
+    generateDominantList();
+}
 
 function generateDominantList() {
   const container = document.getElementById('dominantList');
@@ -2442,16 +2464,13 @@ function generateDominantList() {
   const unassignedCards = [];
  
   dominantData.forEach(dom => {
-      // Ensure we have a counter for this card name
       if (!cardCounts[dom.name]) {
           cardCounts[dom.name] = 0;
       }
      
-      // Create a stable ID for this card instance
       const instanceNum = cardCounts[dom.name]++;
       const cardId = `${dom.name}::${instanceNum}`;
      
-      // Check if this card is assigned
       const player = playerAssignments[cardId];
      
       if (player) {
@@ -2461,10 +2480,25 @@ function generateDominantList() {
       }
   });
  
-  // Sort assigned cards by player name
-  assignedCards.sort((a, b) => a.player.localeCompare(b.player));
+  // Sort assigned cards by player number, then alphabetically by card name
+  assignedCards.sort((a, b) => {
+      const playerA = a.player;
+      const playerB = b.player;
+      
+      // Extract the numeric part of the player name
+      const playerNumA = parseInt(playerA.match(/\d+/)[0]);
+      const playerNumB = parseInt(playerB.match(/\d+/)[0]);
+      
+      // First sort by player number
+      if (playerNumA !== playerNumB) {
+          return playerNumA - playerNumB;
+      }
+      
+      // Then sort alphabetically by card name
+      return a.card.name.localeCompare(b.card.name);
+  });
  
-  // Sort unassigned cards by name
+  // Sort unassigned cards alphabetically
   unassignedCards.sort((a, b) => a.card.name.localeCompare(b.card.name));
  
   // Combine sorted lists: assigned first, then unassigned
@@ -2479,28 +2513,25 @@ function generateDominantList() {
       const card = document.createElement('div');
       card.className = 'dominant-card';
       card.style.borderColor = getNameColor(dom.name);
-      card.dataset.cardId = cardId; // Store the card ID in the DOM element
-      card.dataset.stableId = cardId; // Also store as stableId for consistency
+      card.dataset.cardId = cardId;
+      card.dataset.stableId = cardId;
      
-      // Highlight cards assigned to a player
       if (player) {
           card.style.background = `linear-gradient(to right, ${getNameColor(dom.name)}22, transparent)`;
       }
      
-      // Restore tier selection if available
       const storedTier = persistentTierSelections[cardId];
      
       if (storedTier) {
           card.dataset.currentTier = storedTier;
       }
      
-      // Create tier select dropdown options
       const tierSelectOptions = Object.keys(dom.tiers).map(tier =>
           `<option value="${tier}" ${storedTier === tier ? 'selected' : ''}>Tier ${tier}</option>`
       ).join('');
      
       card.innerHTML = `
-          <div class" style="color: ${getNameColor(dom.name)}">
+          <div class="dominant-name" style="color: ${getNameColor(dom.name)}">
               ${dom.name}
           </div>
           <div class="tier-display">${storedTier || '-'}</div>
@@ -2522,6 +2553,48 @@ function generateDominantList() {
       `;
       container.appendChild(card);
   });
+}
+
+function rollDominantTier(button) {
+    const card = button.closest('.dominant-card');
+    const domName = card.querySelector('.dominant-name').textContent.trim();
+    const tierSelect = card.querySelector('.tier-select');
+    
+    // Set weights with your specified percentages
+    const tierWeights = {
+        "1": 15,  // 15% chance
+        "2": 35,  // 35% chance (most common)
+        "3": 25,  // 25% chance
+        "4": 15,  // 15% chance
+        "5": 10   // 10% chance
+    };
+    
+    // Generate a random number
+    const random = Math.random() * 100;
+    
+    // Select tier based on weight
+    let selectedTier = "2"; // Default to most common
+    let cumulativeWeight = 0;
+    
+    for (const [tier, weight] of Object.entries(tierWeights)) {
+        cumulativeWeight += weight;
+        if (random <= cumulativeWeight) {
+            selectedTier = tier;
+            break;
+        }
+    }
+    
+    // Set the value in the select element
+    tierSelect.value = selectedTier;
+    
+    // Update tier display
+    setDominantTier(tierSelect);
+    
+    // Add visual effect for the roll
+    button.classList.add('fire-pulse-animation');
+    setTimeout(() => {
+        button.classList.remove('fire-pulse-animation');
+    }, 500);
 }
 
 function setDominantTier(select) {
@@ -2560,54 +2633,7 @@ function setDominantTier(select) {
     
 }
 
-function assignDominant(select, dominantName) {
-    const card = select.closest('.dominant-card');
-    const stableId = card.dataset.stableId;
-    const playerName = select.value;
-   
-    // Update player assignments
-    if (playerName) {
-        playerAssignments[stableId] = playerName;
-    } else {
-        delete playerAssignments[stableId];
-    }
-   
-    // No need to regenerate the entire list - this allows players to be changed easily
-    card.style.background = playerName ? 
-        `linear-gradient(to right, ${getNameColor(dominantName)}22, transparent)` : '';
-}
 
-function rollDominantTier(button) {
-  const card = button.closest('.dominant-card');
-  const dominantName = card.getAttribute('data-name');
-  const tierDisplay = card.querySelector('.tier-display');
-  const tierDescription = card.querySelector('.tier-description');
-  
-  const dominant = getDominants().find(d => d.name === dominantName);
-  if (!dominant || !dominant.tiers) return;
-  
-  const tiers = Object.keys(dominant.tiers);
-  if (tiers.length === 0) return;
-  
-  const tier = tiers[Math.floor(Math.random() * tiers.length)];
-  const description = dominant.tiers[tier].description;
-  
-  tierDisplay.innerHTML = `<span style="opacity: 0.7;">Tier:</span> ${tier}`;
-  tierDisplay.style.opacity = '1';
-  
-  tierDescription.textContent = description;
-  tierDescription.style.display = description ? 'block' : 'none';
-  
-  // Update the select element if it exists
-  const tierSelect = card.querySelector('.tier-select');
-  if (tierSelect) {
-    tierSelect.value = tier;
-  }
-  
-  // Update the dominant's tier in the data
-  updateDominantTier(dominantName, tier);
-  updateDominantCounter();
-}
 
 
       // Age setup global variables
@@ -3591,96 +3617,7 @@ function initializeMeaningOfLife() {
     updateMeaningOfLifeSection();
 }
 
-        function generateDominantList() {
-          const container = document.getElementById('dominantList');
-          container.innerHTML = '';
-         
-          // Keep track of count for each card name to create stable IDs
-          const cardCounts = {};
-         
-          // First identify which cards are assigned to players
-          const assignedCards = [];
-          const unassignedCards = [];
-         
-          dominantData.forEach(dom => {
-              // Ensure we have a counter for this card name
-              if (!cardCounts[dom.name]) {
-                  cardCounts[dom.name] = 0;
-              }
-             
-              // Create a stable ID for this card instance
-              const instanceNum = cardCounts[dom.name]++;
-              const cardId = `${dom.name}::${instanceNum}`;
-             
-              // Check if this card is assigned
-              const player = playerAssignments[cardId];
-             
-              if (player) {
-                  assignedCards.push({ card: dom, player, stableId: cardId });
-              } else {
-                  unassignedCards.push({ card: dom, cardId });
-              }
-          });
-         
-          // Sort assigned cards by player name
-          assignedCards.sort((a, b) => a.player.localeCompare(b.player));
-         
-          // Sort unassigned cards by name
-          unassignedCards.sort((a, b) => a.card.name.localeCompare(b.card.name));
-         
-          // Combine sorted lists: assigned first, then unassigned
-          const allCards = [...assignedCards, ...unassignedCards];
-         
-          // Render all cards
-          allCards.forEach(item => {
-              const dom = item.card;
-              const cardId = item.cardId;
-              const player = item.player || "";
-             
-              const card = document.createElement('div');
-              card.className = 'dominant-card';
-              card.style.borderColor = getNameColor(dom.name);
-              card.dataset.cardId = cardId; // Store the card ID in the DOM element
-             
-              // Highlight cards assigned to a player
-              if (player) {
-                  card.style.background = `linear-gradient(to right, ${getNameColor(dom.name)}22, transparent)`;
-              }
-             
-              // Restore tier selection if available
-              const storedTier = persistentTierSelections[cardId];
-             
-              if (storedTier) {
-                  card.dataset.currentTier = storedTier;
-              }
-             
-              // Create tier select dropdown options
-              const tierSelectOptions = Object.keys(dom.tiers).map(tier =>
-                  `<option value="${tier}">Tier ${tier}</option>`
-              ).join('');
-             
-              card.innerHTML = `
-                  <div class" style="color: ${getNameColor(dom.name)}">
-                      ${dom.name}
-                  </div>
-                  <div class="tier-display">-</div>
-                  <button class="tier-roll-button" onclick="rollDominantTier(this)">🎲</button>
-                  <button class="tier-roll-button" onclick="toggleAllTiers(this, '${dom.name}')">Show All</button>
-                  <div class="dominant-button-group">
-                      <select class="tier-select" onchange="setDominantTier(this)">
-                          <option value="">Tier:</option>
-                          ${tierSelectOptions}
-                      </select>
-                      <select class="player-select" onchange="assignDominant(this, '${dom.name}')">
-                          <option value="">-</option>
-                          ${getPlayerNames().map(p => `<option value="${p}" ${p === player ? 'selected' : ''}>${p}</option>`).join('')}
-                      </select>
-                  </div>
-                  <div class="tier-description"></div>
-              `;
-              container.appendChild(card);
-          });
-        }
+        
        
         function showTierSelect(button) {
             const card = button.closest('.dominant-card');
@@ -3702,55 +3639,7 @@ function initializeMeaningOfLife() {
             return `hsl(${Math.abs(hash % 360)}, 70%, 60%)`;
         }
 
-        function rollDominantTier(button) {
-          const weights = { 1: 40, 2: 30, 3: 20, 4: 10, 5: 5 };
-          const total = Object.values(weights).reduce((a, b) => a + b, 0);
-          const random = Math.random() * total;
-         
-          let sum = 0;
-          let tier = 1;
-          for (const [t, weight] of Object.entries(weights)) {
-              sum += weight;
-              if (random <= sum) {
-                  tier = parseInt(t);
-                  break;
-              }
-          }
-         
-          const card = button.closest('.dominant-card');
-          const tierDisplay = card.querySelector('.tier-display');
-          const descDisplay = card.querySelector('.tier-description');
-          const domName = card.querySelector('.dominant-name').textContent.trim();
-         
-          // Store the current tier in the card's dataset
-          card.dataset.currentTier = tier;
-         
-          // Store the tier in the appropriate persistent storage
-          const cardId = card.dataset.cardId;
-          if (cardId) {
-              persistentTierSelections[cardId] = tier;
-          }
-         
-          // Find the matching dominant
-          const dominant = dominantData.find(d => d.name === domName);
-         
-          if (dominant && dominant.tiers && dominant.tiers[tier]) {
-              descDisplay.textContent = dominant.tiers[tier];
-              descDisplay.style.display = 'block';
-             
-              // Reset the "Show All" button if visible
-              const showAllButton = card.querySelector('[onclick^="toggleAllTiers"]');
-              if (showAllButton) {
-                  showAllButton.textContent = 'Show All';
-              }
-          } else {
-              descDisplay.textContent = 'Description not available';
-              descDisplay.style.display = 'block';
-          }
-         
-          tierDisplay.textContent = tier;
-          tierDisplay.style.background = `hsl(${130 - (tier * 15)}, 70%, 30%)`;
-        }
+        
        
         function toggleAllTiers(button, dominantName) {
           const card = button.closest('.dominant-card');
