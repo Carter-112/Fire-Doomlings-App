@@ -845,7 +845,7 @@ let playerMeaningCards = {};
 let playerMeaningChoices = {};
 let currentRevealPlayer = null;
      
-      let playerAssignments = {}; // Add these variables at the top of your script
+      let playerAssignments = getCookie('playerAssignments') || {}; // Initialize from cookies if available
 let nextCardId = 1;
 let cardNameToIdsMap = {}; // Tracks all IDs for each card name
 let persistentTierSelections = {}; // Stores permanent tier selections by stable ID
