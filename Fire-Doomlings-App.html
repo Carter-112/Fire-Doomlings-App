@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOMlings Companion</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="gradient-overlay"></div>
+<div class="blue-glow-container">
+  <div class="blue-circles">
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+    <div class="blue-circle"></div>
+  </div>
+</div>
+    <div class="container">
+      <div class="nav">
+    <button class="nav-button" onclick="showSection('challenges')">Challenges</button>
+    <button class="nav-button" onclick="showSection('dominants')">Dominants</button>
+    <button class="nav-button" onclick="showSection('ageSetup')">Age Setup</button>
+    <button class="nav-button" onclick="showSection('meaningOfLife')">Meaning of Life</button>
+    <button class="nav-button" onclick="showSection('trinkets')">Trinkets</button>
+</div>
+        <div id="ageSetupSection" class="age-setup-section">
+            <h2 class="section-title">Age Setup</h2>
+           
+            <div class="age-config">
+                <div class="slider-container">
+                    <span>Normal Ages: </span>
+                    <span id="normalCount">0</span>
+                    <input type="range" class="slider" min="0" max="0" value="0" id="normalSlider">
+                </div>
+               
+                <div class="slider-container">
+                    <span>Merchant Ages: </span>
+                    <span id="merchantCount">0</span>
+                    <input type="range" class="slider" min="0" max="0" value="0" id="merchantSlider">
+                </div>
+               
+                <div class="slider-container">
+                    <span>Catastrophe Ages: </span>
+                    <span id="catastropheCount">0</span>
+                    <input type="range" class="slider" min="0" max="0" value="0" id="catastropheSlider">
+                </div>
+               
+                <div class="mode-toggle">
+                    <input type="checkbox" id="finalCatastropheMode" checked>
+                    <label for="finalCatastropheMode">Final Catastrophe at End</label>
+                </div>
+            </div>
+           
+            <button class="generate-btn" onclick="generateAgeDeck()">Generate Age Deck</button>
+           
+            <div class="age-navigation">
+                <button class="nav-button" onclick="previousAge()">Previous Age</button>
+                <span id="ageCounter"></span>
+                <button class="nav-button" onclick="nextAge()">Next Age</button>
+            </div>
+           
+            <div class="age-display" id="ageDisplay">
+                Generate a deck to start
+            </div>
+        </div>
+
+        <div id="challengesSection">
+            <h1 class="section-title">Challenges</h1>
+           
+            <div class="player-control">
+                <div class="slider-container">
+                    <span>Players: </span>
+                    <span id="playerCount">2</span>
+                    <input type="range" class="slider" min="2" max="6" value="2" id="playerSlider">
+                </div>
+               
+                <div class="mode-toggle">
+                    <input type="checkbox" id="catastropheMode">
+                    <label for="catastropheMode">Catastrophe Mode</label>
+                </div>
+
+                <div class="name-inputs" id="nameInputs">
+                    <!-- Name inputs will be added here -->
+                </div>
+            </div>
+
+            <button onclick="rollNewAge()">🎲 ROLL NEW CHALLENGE</button>
+
+            <div class="rule-display" id="ruleDisplay">
+                Tap Roll to start!
+            </div>
+
+            <div class="player-display" id="playerDisplay"></div>
+        </div>
+
+        <div id="dominantSection" class="dominant-section">
+          <h2 class="section-title">Dominants</h2>
+            <div class="dominant-list" id="dominantList"></div>
+        </div>
+        <div id="meaningOfLifeSection" class="meaning-section">
+    <h2 class="section-title">Meaning of Life</h2>
+   
+    <div class="player-control">
+        <button id="assignMeaningCards" class="generate-btn">Assign Meaning of Life Cards</button>
+        <div id="meaningCardStatus" class="status-display"></div>
+    </div>
+   
+    <div id="playerMeaningCards" class="player-meaning-cards">
+        <!-- Player cards will be generated here -->
+    </div>
+   
+    <div class="action-buttons">
+        <button id="worldsEndButton" class="nav-button">World's End: Reveal All</button>
+        <button id="resetMeaningButton" class="nav-button">Reset Cards</button>
+    </div>
+</div>
+<!-- Trinkets Section -->
+<div id="trinketsSection" class="trinkets-section">
+    <h2 class="section-title">Trinkets</h2>
+   
+    <div class="player-control">
+        <button id="assignTrinkets" class="generate-btn">Assign Trinkets</button>
+        <div id="trinketStatus" class="status-display"></div>
+    </div>
+   
+    <div id="playerTrinkets" class="player-trinkets">
+        <!-- Player trinket cards will be generated here -->
+    </div>
+   
+    <div class="action-buttons">
+        <button id="worldsEndTrinketButton" class="nav-button">World's End: Show Scores</button>
+        <button id="resetTrinketsButton" class="nav-button">Reset Trinkets</button>
+    </div>
+</div>
+    </div>
+
+    <!-- Scripts should be at the end of body for better performance -->
+    <script src="cookies.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
