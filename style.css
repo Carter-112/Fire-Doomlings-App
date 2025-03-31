@@ -1007,10 +1007,12 @@ button::after {
     display: flex;
     gap: 0.5rem;
     margin-top: 0.8rem;
+    flex-wrap: wrap; /* Allow buttons to wrap on small screens */
 }
 
 .trinket-btn {
     flex: 1;
+    min-width: 60px; /* Ensure minimum button width */
     color: var(--text);
     border: none;
     border-radius: 4px;
@@ -1431,5 +1433,21 @@ button::after {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 15px;
+    }
+}
+
+/* Mobile-specific adjustments */
+@media screen and (max-width: 480px) {
+    .trinket-actions {
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 0.3rem;
+    }
+    
+    .trinket-btn {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.85rem;
+        flex-basis: calc(33% - 0.3rem); /* Each button takes up a third of the space minus the gap */
+        min-width: auto;
     }
 }
