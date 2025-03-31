@@ -639,14 +639,6 @@ function addHeatShimmer() {
 }
 addHeatShimmer();
    
-
-
-     
-     
-// Meaning of Life card data
-// sM represents signMultiplication - a scaling factor based on number of ages
-const meaningOfLifeData =[]
-
 // State variables for Meaning of Life feature
 let playerMeaningCards = {};
 let playerMeaningChoices = {};
@@ -899,25 +891,6 @@ function setDominantTier(select) {
         document.getElementById('finalCatastropheMode').addEventListener('change', function(e) {
             ageSetup.finalCatastropheAtEnd = e.target.checked;
         });
-     
-// Age data arrays
-const normalAgeData = [
-
-];
-
-const merchantAgeData = [
-
-];
-
-const catastropheAgeData = [
-
-];
-        // =================
-        // DOMINANT SYSTEM
-        // =================
-        const dominantData = [
-
-];
 
 function showSection(section) {
   document.getElementById('challengesSection').style.display =
@@ -1025,18 +998,6 @@ function initializeMeaningOfLife() {
             });
         }
 
-        
-
-        // =================
-        // BASE GAME SYSTEM
-        // =================
-        const normalRules = [
-            
-        ];
-
-        const catastropheRules = [
-
-        ];
 
         let selectionHistory = [];
 
@@ -1505,10 +1466,6 @@ function nextAge() {
         // Scroll will happen in displayCurrentAge()
     }
 }
-
-const trinketData = [
-
-];
 
 // State variables for Trinkets feature
 let playerTrinkets = {}; // Holds each player's current trinkets
@@ -2134,11 +2091,104 @@ document.addEventListener('DOMContentLoaded', function() {
   document.head.appendChild(style);
 });
 
-        // Initialize
-        updateNameInputs(2);
-        generateDominantList();
-        updatePlayerSelects();
+// Data storage variables
+let meaningOfLifeData = [];
+let normalAgeData = [];
+let merchantAgeData = [];
+let catastropheAgeData = [];
+let dominantData = [];
+let normalRules = [];
+let catastropheRules = [];
+let trinketData = [];
+
+// Function to load all JSON data
+async function loadAllData() {
+    try {
+        // Load all data in parallel
+        const [
+            meaningOfLife,
+            normalAge,
+            merchantAge,
+            catastropheAge,
+            dominant,
+            normalRule,
+            catastropheRule,
+            trinket
+        ] = await Promise.all([
+            fetch('meaningOfLifeData.json').then(res => res.json()),
+            fetch('normalAgeData.json').then(res => res.json()),
+            fetch('merchantAgeData.json').then(res => res.json()),
+            fetch('catastropheData.json').then(res => res.json()),
+            fetch('dominantData.json').then(res => res.json()),
+            fetch('normalRules.json').then(res => res.json()),
+            fetch('catastropheRules.json').then(res => res.json()),
+            fetch('trinketData.json').then(res => res.json())
+        ]);
+
+        // Assign loaded data to variables
+        meaningOfLifeData = meaningOfLife;
+        normalAgeData = normalAge;
+        merchantAgeData = merchantAge;
+        catastropheAgeData = catastropheAge;
+        dominantData = dominant;
+        normalRules = normalRule;
+        catastropheRules = catastropheRule;
+        trinketData = trinket;
+
+        // Initialize UI components that depend on the data
         updateAgeSliders();
-        initializeMeaningOfLife();
-        initializeTrinkets();
-        switchToChallengePage();
+        generateDominantList();
+        resetTrinkets();
+        updateMeaningOfLifeSection();
+        
+        // Enable UI elements that were waiting for data
+        document.querySelectorAll('button').forEach(btn => btn.disabled = false);
+        
+    } catch (error) {
+        console.error('Error loading game data:', error);
+        alert('Error loading game data. Please refresh the page.');
+    }
+}
+
+// Replace the old initialization with async initialization
+document.addEventListener('DOMContentLoaded', async function() {
+    // Disable UI elements until data is loaded
+    document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+    
+    // Create the phoenix logo
+    const phoenixLogo = document.createElement('div');
+    phoenixLogo.className = 'phoenix-logo';
+    
+    // Add logo elements
+    phoenixLogo.innerHTML = `
+        <div class="phoenix-image"></div>
+        <div class="logo-text">
+            <h1>DOOMLINGS</h1>
+            <h2>COMPANION</h2>
+        </div>
+    `;
+    
+    // Insert the logo at the top of the container
+    const container = document.querySelector('.container');
+    const nav = container.querySelector('.nav');
+    container.insertBefore(phoenixLogo, nav);
+    
+    // Load all data first
+    await loadAllData();
+    
+    // Initialize features
+    updateNameInputs(2);
+    generateDominantList();
+    updatePlayerSelects();
+    updateAgeSliders();
+    initializeMeaningOfLife();
+    initializeTrinkets();
+    switchToChallengePage();
+    
+    // Load saved state from cookies
+    loadGameState();
+    setupAutoSave();
+    
+    // Add scaling multiplier display
+    addScalingMultiplierDisplay();
+});
