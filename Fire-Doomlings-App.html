@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Load Supabase in the head -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Make createClient available globally as soon as possible
+        console.log("HTML: Setting up createClient...");
+        if (typeof supabase !== 'undefined' && supabase.createClient) {
+            console.log("HTML: supabase object available, extracting createClient");
+            window.createClient = supabase.createClient;
+        } else {
+            console.error("HTML: supabase object not available or missing createClient function!");
+        }
+    </script>
+    
     <style>
         /* Supabase test panel styles */
         #supabaseTestPanel {
@@ -206,8 +220,12 @@
         <div class="supabaseInfo">
             User ID: <span id="supabaseUserId">None</span>
         </div>
+        <div class="supabaseInfo">
+            createClient: <span id="createClientStatus">Unknown</span>
+        </div>
         <div id="testPanel">
             <button onclick="testSupabaseConnection()">Test Connection</button>
+            <button onclick="directSupabaseTest()">Direct Test</button>
             <button onclick="clearLocalStorage()">Clear localStorage</button>
             <button onclick="refreshPage()">Refresh Page</button>
         </div>
@@ -228,13 +246,76 @@
         function refreshPage() {
             location.reload();
         }
-    </script>
-
-    <!-- Supabase library for cross-device sync -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-        // Make createClient available globally
-        const { createClient } = supabase;
+        
+        // Additional debugging
+        document.addEventListener('DOMContentLoaded', function() {
+            const clientStatus = document.getElementById('createClientStatus');
+            if (typeof createClient === 'function') {
+                clientStatus.textContent = 'Available ✅';
+                clientStatus.style.color = 'lightgreen';
+            } else {
+                clientStatus.textContent = 'Missing ❌';
+                clientStatus.style.color = 'red';
+                console.error("createClient is not available at DOMContentLoaded event");
+            }
+        });
+        
+        // Direct Supabase test without any dependencies
+        async function directSupabaseTest() {
+            const testResult = document.getElementById('testResult');
+            testResult.innerHTML = "Running direct test...";
+            
+            try {
+                // Check if createClient is available
+                if (typeof createClient !== 'function') {
+                    testResult.innerHTML = "ERROR: createClient function not available!";
+                    return;
+                }
+                
+                // Create Supabase client directly
+                const SUPABASE_URL = 'https://amfrqooxhxdejbeltbxa.supabase.co';
+                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZnJxb294aHhkZWpiZWx0YnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NjgxMjMsImV4cCI6MjA1OTA0NDEyM30.7Trplc0IR4OT_EPdFiH7voEsodP8yXX6MISbapr7UWo';
+                
+                testResult.innerHTML = "Creating client...";
+                const testClient = createClient(SUPABASE_URL, SUPABASE_KEY);
+                
+                testResult.innerHTML = "Trying anonymous sign-in...";
+                const { data, error } = await testClient.auth.signInAnonymously();
+                
+                if (error) {
+                    testResult.innerHTML = "Auth Error: " + error.message;
+                    return;
+                }
+                
+                if (!data || !data.user) {
+                    testResult.innerHTML = "No user data returned!";
+                    return;
+                }
+                
+                testResult.innerHTML = "SUCCESS! User ID: " + data.user.id;
+                
+                // Try a simple database operation
+                try {
+                    testResult.innerHTML += "<br>Testing table access...";
+                    const { data: tableData, error: tableError } = await testClient
+                        .from('playernames')
+                        .select('*')
+                        .limit(1);
+                    
+                    if (tableError) {
+                        testResult.innerHTML += "<br>Table Error: " + tableError.message;
+                    } else {
+                        testResult.innerHTML += "<br>Table access successful!";
+                    }
+                } catch (dbError) {
+                    testResult.innerHTML += "<br>Database Error: " + dbError.message;
+                }
+                
+            } catch (e) {
+                testResult.innerHTML = "ERROR: " + e.message;
+                console.error("Direct test error:", e);
+            }
+        }
     </script>
     
     <!-- Load our scripts -->

@@ -1,7 +1,24 @@
 // Supabase client setup
 const SUPABASE_URL = 'https://amfrqooxhxdejbeltbxa.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZnJxb294aHhkZWpiZWx0YnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NjgxMjMsImV4cCI6MjA1OTA0NDEyM30.7Trplc0IR4OT_EPdFiH7voEsodP8yXX6MISbapr7UWo';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Direct console logging for immediate debugging
+console.log("Supabase.js loaded, URL:", SUPABASE_URL);
+console.log("Creating Supabase client...");
+
+try {
+    // Check if the supabase object exists
+    if (typeof createClient !== 'function') {
+        console.error("CRITICAL ERROR: createClient is not available! Supabase library may not be loaded correctly.");
+        document.getElementById('testResult').textContent = "ERROR: Supabase library not loaded correctly. Check console.";
+    }
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    console.log("Supabase client created successfully");
+} catch (e) {
+    console.error("Error creating Supabase client:", e);
+    document.getElementById('testResult').textContent = "ERROR: " + e.message;
+}
 
 // Global debug flag
 const ENABLE_DEBUG = true;
@@ -15,27 +32,49 @@ function logDebug(...args) {
 
 // User authentication
 async function signInAnonymously() {
+    console.log("signInAnonymously called");
     logDebug('Attempting anonymous sign-in');
     
     try {
         // First check if we already have a session
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log("Checking for existing session...");
+        const sessionResponse = await supabase.auth.getSession();
+        console.log("Session response:", sessionResponse);
+        
+        const { data: { session } } = sessionResponse;
         
         if (session) {
-            logDebug('Existing session found:', session.user.id);
+            console.log('Existing session found:', session.user.id);
             return session.user;
         }
         
         // If not, create a new anonymous session
-        logDebug('No session found, creating anonymous user');
-        const { data, error } = await supabase.auth.signInAnonymously();
+        console.log('No session found, creating anonymous user');
+        
+        // Check if anonymous auth is enabled
+        try {
+            const { data: authSettings, error: authError } = await supabase.rpc('get_auth_settings');
+            console.log("Auth settings:", authSettings, authError);
+        } catch (e) {
+            console.log("Couldn't check auth settings, continuing anyway:", e);
+        }
+        
+        const authResponse = await supabase.auth.signInAnonymously();
+        console.log("Anonymous auth response:", authResponse);
+        
+        const { data, error } = authResponse;
         
         if (error) {
-            logDebug('Auth error:', error);
+            console.error('Auth error:', error);
             throw new Error('Authentication error: ' + error.message);
         }
         
-        logDebug('Anonymous sign-in successful:', data.user.id);
+        if (!data || !data.user) {
+            console.error('No user data returned from auth');
+            throw new Error('No user data returned from authentication');
+        }
+        
+        console.log('Anonymous sign-in successful:', data.user.id);
         return data.user;
     } catch (error) {
         console.error('Error signing in:', error);
