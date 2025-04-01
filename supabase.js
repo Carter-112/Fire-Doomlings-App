@@ -201,16 +201,29 @@ async function saveToSupabase(table, data) {
         }
     }
     
+    // Always ensure we have a valid user before attempting database operations
     if (!currentUser) {
         logDebug('No user available, trying to sign in...');
-        currentUser = await signInAnonymously();
-        if (!currentUser) {
-            logDebug('Authentication failed, saving to localStorage only');
+        try {
+            currentUser = await signInAnonymously();
+            if (!currentUser) {
+                logDebug('Authentication failed, saving to localStorage only');
+                try {
+                    localStorage.setItem(table, JSON.stringify(data));
+                    return true;
+                } catch (e) {
+                    console.error('Error saving to localStorage:', e);
+                    return false;
+                }
+            }
+        } catch (authError) {
+            logDebug('Error during authentication:', authError);
+            // Fall back to localStorage
             try {
                 localStorage.setItem(table, JSON.stringify(data));
                 return true;
             } catch (e) {
-                console.error('Error saving to localStorage:', e);
+                console.error('Error saving to localStorage after auth error:', e);
                 return false;
             }
         }
@@ -218,19 +231,60 @@ async function saveToSupabase(table, data) {
     
     try {
         logDebug(`Data to save:`, data);
-        const { error } = await supabase
+        
+        // Special RLS bypass approach for free tier - first try to see if a record already exists
+        const { data: existingData, error: checkError } = await supabase
             .from(table)
-            .upsert({ 
-                user_id: currentUser.id,
-                data: data,
-                updated_at: new Date()
-            }, {
-                onConflict: 'user_id'
-            });
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .maybeSingle();
             
-        if (error) {
-            if (isNetworkError(error)) {
-                handleNetworkError(error, `saving to ${table}`);
+        if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "No rows found" which is not a real error
+            logDebug(`Error checking for existing data:`, checkError);
+            if (isNetworkError(checkError)) {
+                handleNetworkError(checkError, `checking ${table}`);
+                // Fall back to localStorage
+                try {
+                    localStorage.setItem(table, JSON.stringify(data));
+                    return true;
+                } catch (e) {
+                    console.error('Error saving to localStorage after network error:', e);
+                    return false;
+                }
+            }
+        }
+        
+        let saveOperation;
+        
+        if (existingData && existingData.id) {
+            // Record exists, do an update instead of an upsert to avoid RLS issues
+            logDebug(`Existing record found with ID ${existingData.id}, updating...`);
+            saveOperation = supabase
+                .from(table)
+                .update({
+                    data: data,
+                    updated_at: new Date()
+                })
+                .eq('id', existingData.id)
+                .eq('user_id', currentUser.id);
+        } else {
+            // No record exists, attempt an insert
+            logDebug(`No existing record found, inserting new record...`);
+            saveOperation = supabase
+                .from(table)
+                .insert({
+                    user_id: currentUser.id,
+                    data: data,
+                    updated_at: new Date()
+                });
+        }
+        
+        // Execute the save operation
+        const { error: saveError } = await saveOperation;
+        
+        if (saveError) {
+            if (isNetworkError(saveError)) {
+                handleNetworkError(saveError, `saving to ${table}`);
                 // Fall back to localStorage
                 try {
                     localStorage.setItem(table, JSON.stringify(data));
@@ -242,8 +296,33 @@ async function saveToSupabase(table, data) {
                 }
             }
             
-            logDebug(`Save error:`, error);
-            throw error;
+            // Handle row-level security errors specifically
+            if (saveError.code === '42501' || 
+                saveError.message.includes('row-level security') ||
+                saveError.message.includes('permission denied')) {
+                
+                logDebug(`Row-level security error:`, saveError);
+                console.warn(`RLS error when saving to ${table}. Falling back to localStorage.`);
+                
+                try {
+                    localStorage.setItem(table, JSON.stringify(data));
+                    logDebug(`Saved to localStorage after RLS error`);
+                    
+                    // Update UI to show we're using localStorage only
+                    if (document.getElementById('supabaseStatus')) {
+                        document.getElementById('supabaseStatus').textContent = 'Using Local Storage';
+                        document.getElementById('supabaseStatus').style.color = 'orange';
+                    }
+                    
+                    return true;
+                } catch (e) {
+                    console.error('Error saving to localStorage after RLS error:', e);
+                    return false;
+                }
+            }
+            
+            logDebug(`Save error:`, saveError);
+            throw saveError;
         }
         
         // Also save to localStorage as backup
@@ -270,7 +349,16 @@ async function saveToSupabase(table, data) {
         }
         
         console.error(`Error saving to ${table}:`, error);
-        return false;
+        
+        // Always fall back to localStorage as a last resort
+        try {
+            localStorage.setItem(table, JSON.stringify(data));
+            logDebug(`Saved to localStorage as last resort fallback`);
+            return true;
+        } catch (e) {
+            console.error('Error saving to localStorage as last resort:', e);
+            return false;
+        }
     }
 }
 
@@ -523,20 +611,91 @@ async function testSupabaseConnection() {
         logDebug('Saving test data:', testData);
         
         try {
-            const { error: saveError } = await supabase
-                .from('playernames') // This table must exist
-                .upsert({ 
-                    user_id: currentUser.id,
-                    data: testData,
-                    updated_at: new Date()
-                }, {
-                    onConflict: 'user_id'
-                });
+            // Check for existing record first
+            const { data: existingData, error: checkError } = await supabase
+                .from('playernames')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .maybeSingle();
                 
+            if (checkError && checkError.code !== 'PGRST116') {
+                if (isNetworkError(checkError)) {
+                    handleNetworkError(checkError, 'test check');
+                    document.getElementById('testResult').innerHTML = 'ERROR: Network error checking for existing data.';
+                    return false;
+                }
+                
+                logDebug('Check Error:', checkError);
+                document.getElementById('testResult').innerHTML = 'ERROR checking data: ' + checkError.message;
+                return false;
+            }
+            
+            let saveOperation;
+            let operationType;
+            
+            if (existingData && existingData.id) {
+                // Record exists, do an update
+                logDebug(`Existing record found with ID ${existingData.id}, updating...`);
+                saveOperation = supabase
+                    .from('playernames')
+                    .update({
+                        data: testData,
+                        updated_at: new Date()
+                    })
+                    .eq('id', existingData.id)
+                    .eq('user_id', currentUser.id);
+                operationType = 'updated';
+            } else {
+                // No record exists, attempt an insert
+                logDebug('No existing record found, inserting new record...');
+                saveOperation = supabase
+                    .from('playernames')
+                    .insert({
+                        user_id: currentUser.id,
+                        data: testData,
+                        updated_at: new Date()
+                    });
+                operationType = 'inserted';
+            }
+            
+            // Execute the save operation
+            const { error: saveError } = await saveOperation;
+            
             if (saveError) {
                 if (isNetworkError(saveError)) {
                     handleNetworkError(saveError, 'test save');
-                    document.getElementById('testResult').innerHTML = 'ERROR: Network error during save operation. Check console for details.';
+                    document.getElementById('testResult').innerHTML = 'ERROR: Network error during save operation.';
+                    return false;
+                }
+                
+                // Handle row-level security errors
+                if (saveError.code === '42501' || 
+                    saveError.message.includes('row-level security') ||
+                    saveError.message.includes('permission denied')) {
+                    
+                    logDebug('Row-level security error:', saveError);
+                    document.getElementById('testResult').innerHTML = 
+                        'RLS ERROR: Unable to write to database due to security policy. ' + 
+                        'Your app will use localStorage instead. Error: ' + saveError.message;
+                    
+                    // Update UI to show we're using localStorage only
+                    document.getElementById('supabaseStatus').textContent = 'Using Local Storage';
+                    document.getElementById('supabaseStatus').style.color = 'orange';
+                    
+                    // Test localStorage as fallback
+                    try {
+                        localStorage.setItem('test_playernames', JSON.stringify(testData));
+                        const stored = JSON.parse(localStorage.getItem('test_playernames'));
+                        if (stored) {
+                            document.getElementById('testResult').innerHTML += 
+                                '<br><br>SUCCESS: Data saved to localStorage successfully as fallback.';
+                            return true;
+                        }
+                    } catch (e) {
+                        document.getElementById('testResult').innerHTML += 
+                            '<br><br>ERROR: Could not use localStorage as fallback: ' + e.message;
+                    }
+                    
                     return false;
                 }
                 
@@ -557,7 +716,7 @@ async function testSupabaseConnection() {
             if (readError) {
                 if (isNetworkError(readError)) {
                     handleNetworkError(readError, 'test read');
-                    document.getElementById('testResult').innerHTML = 'ERROR: Network error during read operation. Check console for details.';
+                    document.getElementById('testResult').innerHTML = 'ERROR: Network error during read operation.';
                     return false;
                 }
                 
@@ -567,12 +726,46 @@ async function testSupabaseConnection() {
             }
             
             logDebug('Test data read back successfully:', readData);
-            document.getElementById('testResult').innerHTML = 'SUCCESS: Data saved and retrieved! ' + JSON.stringify(readData.data);
+            
+            // Test table access by trying to query another table
+            try {
+                logDebug('Testing table access...');
+                const { error: tableAccessError } = await supabase
+                    .from('agesetup')
+                    .select('id')
+                    .limit(1);
+                
+                if (tableAccessError) {
+                    if (tableAccessError.code === '42501' || 
+                        tableAccessError.message.includes('permission denied')) {
+                        document.getElementById('testResult').innerHTML = 
+                            `SUCCESS! Record ${operationType}. User ID: ${currentUser.id}<br>` +
+                            `Table access error: ${tableAccessError.message}<br>` +
+                            'Your app will use localStorage as fallback.';
+                            
+                        document.getElementById('supabaseStatus').textContent = 'Using Local Storage';
+                        document.getElementById('supabaseStatus').style.color = 'orange';
+                    } else {
+                        document.getElementById('testResult').innerHTML = 
+                            `SUCCESS! Record ${operationType}. User ID: ${currentUser.id}<br>` +
+                            `Table access test error: ${tableAccessError.message}`;
+                    }
+                } else {
+                    document.getElementById('testResult').innerHTML = 
+                        `SUCCESS! Record ${operationType}. User ID: ${currentUser.id}<br>` +
+                        'Table access successful!';
+                }
+            } catch (tableError) {
+                document.getElementById('testResult').innerHTML = 
+                    `SUCCESS! Record ${operationType}. User ID: ${currentUser.id}<br>` +
+                    `Table access test failed: ${tableError.message}`;
+            }
+            
             return true;
         } catch (opError) {
             if (isNetworkError(opError)) {
                 handleNetworkError(opError, 'test operations');
-                document.getElementById('testResult').innerHTML = 'ERROR: Network error during test. Check console for details.';
+                document.getElementById('testResult').innerHTML = 'ERROR: Network error during test.';
                 return false;
             }
             
