@@ -311,8 +311,13 @@
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
-    <script src="config.js"></script>
     <script>
+        // Define config inline as fallback
+        const config = {
+            API_KEY: 'AIzaSyBTeJZXX8c9ACkk74Rgpn4DlaPIvF5fOA0',
+            CLIENT_ID: '994920508017-f4195a89495bkbanqtm4eeint6nfcqdc.apps.googleusercontent.com'
+        };
+
         let currentUser = null;
         let accessToken = null;
         const API_KEY = config.API_KEY;
