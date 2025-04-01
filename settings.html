@@ -658,13 +658,32 @@
             
             document.getElementById('enableScaling').checked = enableScaling;
             
-            document.querySelectorAll('.scale-button').forEach(button => {
+            const scaleButtons = document.querySelectorAll('.scale-button');
+            let activeButton = null;
+            
+            scaleButtons.forEach(button => {
                 if (parseFloat(button.dataset.value) === scalingMultiplier) {
                     button.classList.add('active');
+                    activeButton = button;
                 } else {
                     button.classList.remove('active');
                 }
             });
+
+            // Scroll to active button
+            if (activeButton) {
+                const container = document.querySelector('.scale-buttons');
+                const containerWidth = container.offsetWidth;
+                const buttonLeft = activeButton.offsetLeft;
+                const buttonWidth = activeButton.offsetWidth;
+                
+                // Calculate the scroll position to center the button
+                const scrollPosition = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
+                container.scrollTo({
+                    left: scrollPosition,
+                    behavior: 'smooth'
+                });
+            }
         });
 
         document.getElementById('enableScaling').addEventListener('change', function(e) {
