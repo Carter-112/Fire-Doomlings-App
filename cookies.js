@@ -1,33 +1,35 @@
-// Cookie management functions
-const COOKIE_EXPIRY = 7; // Days until cookies expire
+// Local Storage management functions
+// (Changed from cookies to localStorage per user request)
 
-// Generic cookie functions
-function setCookie(name, value, days = COOKIE_EXPIRY) {
-    const date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = `expires=${date.toUTCString()}`;
-    document.cookie = `${name}=${JSON.stringify(value)};${expires};path=/`;
+function setCookie(name, value, days = 7) {
+    // Convert to JSON string and store in localStorage
+    // days parameter is ignored as localStorage doesn't expire
+    try {
+        localStorage.setItem(name, JSON.stringify(value));
+    } catch (e) {
+        console.error('Error saving to localStorage:', e);
+    }
 }
 
 function getCookie(name) {
-    const cookieName = `${name}=`;
-    const cookies = document.cookie.split(';');
-    
-    for (let cookie of cookies) {
-        cookie = cookie.trim();
-        if (cookie.indexOf(cookieName) === 0) {
-            try {
-                return JSON.parse(cookie.substring(cookieName.length));
-            } catch (e) {
-                return null;
-            }
+    try {
+        const value = localStorage.getItem(name);
+        if (value === null) {
+            return null;
         }
+        return JSON.parse(value);
+    } catch (e) {
+        console.error('Error retrieving from localStorage:', e);
+        return null;
     }
-    return null;
 }
 
 function deleteCookie(name) {
-    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+    try {
+        localStorage.removeItem(name);
+    } catch (e) {
+        console.error('Error deleting from localStorage:', e);
+    }
 }
 
 // Game state specific functions

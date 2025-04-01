@@ -2016,81 +2016,6 @@ function switchToChallengePage() {
     document.getElementById('trinketsSection').style.display = 'none';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  // Create the phoenix logo
-  const phoenixLogo = document.createElement('div');
-  phoenixLogo.className = 'phoenix-logo';
- 
-  // Add logo elements
-  phoenixLogo.innerHTML = `
-    <div class="phoenix-image"></div>
-    <div class="logo-text">
-      <h1>DOOMLINGS</h1>
-      <h2>COMPANION</h2>
-    </div>
-  `;
- 
-  // Insert the logo at the top of the container
-  const container = document.querySelector('.container');
-  const nav = container.querySelector('.nav');
-  container.insertBefore(phoenixLogo, nav);
- 
-  // Add the CSS to the head
-  const style = document.createElement('style');
-  style.textContent = `
-    .phoenix-logo {
-      position: relative;
-      width: 100%;
-      max-width: 350px;
-      height: 120px;
-      margin: 0 auto 20px;
-      overflow: hidden;
-      border-radius: 8px;
-      box-shadow: 0 0 20px rgba(255, 60, 0, 0.3), 0 0 30px rgba(0, 150, 200, 0.2);
-    }
-   
-    .phoenix-image {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('fire_water_phoenix.png');
-      background-size: cover;
-      background-position: center;
-      z-index: 1;
-    }
-   
-    .logo-text {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 10px;
-      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-      text-align: center;
-      z-index: 2;
-    }
-   
-    .logo-text h1 {
-      margin: 0;
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--accent1);
-      text-shadow: 0 0 10px rgba(255, 60, 0, 0.8);
-    }
-   
-    .logo-text h2 {
-      margin: 0;
-      font-size: 16px;
-      font-weight: 400;
-      color: var(--text);
-      letter-spacing: 2px;
-    }
-  `;
-  document.head.appendChild(style);
-});
-
 // Data storage variables
 let meaningOfLifeData = [];
 let normalAgeData = [];
@@ -2104,6 +2029,30 @@ let trinketData = [];
 // Function to load all JSON data
 async function loadAllData() {
     try {
+        // Use XMLHttpRequest instead of fetch for better local file support
+        const loadJson = (url) => {
+            return new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', url, true);
+                xhr.responseType = 'json';
+                
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        resolve(xhr.response);
+                    } else {
+                        reject(new Error(`Failed to load ${url}: ${xhr.statusText}`));
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error(`Network error while loading ${url}`);
+                    reject(new Error(`Network error while loading ${url}`));
+                };
+                
+                xhr.send();
+            });
+        };
+
         // Load all data in parallel
         const [
             meaningOfLife,
@@ -2115,14 +2064,14 @@ async function loadAllData() {
             catastropheRule,
             trinket
         ] = await Promise.all([
-            fetch('meaningOfLifeData.json').then(res => res.json()),
-            fetch('normalAgeData.json').then(res => res.json()),
-            fetch('merchantAgeData.json').then(res => res.json()),
-            fetch('catastropheData.json').then(res => res.json()),
-            fetch('dominantData.json').then(res => res.json()),
-            fetch('normalRules.json').then(res => res.json()),
-            fetch('catastropheRules.json').then(res => res.json()),
-            fetch('trinketData.json').then(res => res.json())
+            loadJson('meaningOfLifeData.json'),
+            loadJson('normalAgeData.json'),
+            loadJson('merchantAgeData.json'),
+            loadJson('catastropheData.json'),
+            loadJson('dominantData.json'),
+            loadJson('normalRules.json'),
+            loadJson('catastropheRules.json'),
+            loadJson('trinketData.json')
         ]);
 
         // Assign loaded data to variables
@@ -2134,61 +2083,192 @@ async function loadAllData() {
         normalRules = normalRule;
         catastropheRules = catastropheRule;
         trinketData = trinket;
-
-        // Initialize UI components that depend on the data
-        updateAgeSliders();
-        generateDominantList();
-        resetTrinkets();
-        updateMeaningOfLifeSection();
         
-        // Enable UI elements that were waiting for data
-        document.querySelectorAll('button').forEach(btn => btn.disabled = false);
-        
+        console.log("All game data loaded successfully");
+        return true;
     } catch (error) {
         console.error('Error loading game data:', error);
-        alert('Error loading game data. Please refresh the page.');
+        alert('Error loading game data. Make sure all JSON files exist in the same directory as your HTML file.\n\nFor best results, use a local web server instead of opening files directly.');
+        return false;
     }
 }
 
-// Replace the old initialization with async initialization
-document.addEventListener('DOMContentLoaded', async function() {
-    // Disable UI elements until data is loaded
-    document.querySelectorAll('button').forEach(btn => btn.disabled = true);
+// Master initialization function
+async function initApplication() {
+    // Step 1: Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.innerHTML = '<div class="loading-spinner"></div>';
+    document.body.appendChild(loadingIndicator);
     
+    // Disable interactive elements until data is loaded
+    document.querySelectorAll('button, select, input').forEach(el => {
+        el.classList.add('loading-disabled');
+        el.disabled = true;
+    });
+    
+    try {
+        // Step 2: Load JSON data
+        const dataLoaded = await loadAllData();
+        if (!dataLoaded) {
+            throw new Error("Failed to load data");
+        }
+        
+        // Step 3: Initialize UI components
+        updateNameInputs(2);
+        generateDominantList();
+        updatePlayerSelects();
+        updateAgeSliders();
+        initializeMeaningOfLife();
+        initializeTrinkets();
+        switchToChallengePage();
+        
+        // Step 4: Load saved state from localStorage
+        if (typeof loadGameState === 'function') {
+            loadGameState();
+        } else {
+            console.warn("loadGameState function not found - saved state won't be loaded");
+        }
+        
+        // Step 5: Setup auto-save
+        if (typeof setupAutoSave === 'function') {
+            setupAutoSave();
+        } else {
+            console.warn("setupAutoSave function not found - auto-save won't be enabled");
+        }
+        
+        // Step 6: Enable UI
+        document.querySelectorAll('.loading-disabled').forEach(el => {
+            el.classList.remove('loading-disabled');
+            el.disabled = false;
+        });
+        
+        // Remove loading indicator
+        loadingIndicator.remove();
+        
+        console.log("Application initialized successfully");
+    } catch (error) {
+        console.error('Failed to initialize application:', error);
+        loadingIndicator.innerHTML = `
+            <div style="color: white; text-align: center; padding: 20px;">
+                <p>Error initializing the application.</p>
+                <p>${error.message}</p>
+                <button onclick="location.reload()" style="padding: 8px 16px; margin-top: 10px;">Retry</button>
+            </div>
+        `;
+    }
+}
+
+// Single DOMContentLoaded event handler for all initialization
+document.addEventListener('DOMContentLoaded', function() {
     // Create the phoenix logo
     const phoenixLogo = document.createElement('div');
     phoenixLogo.className = 'phoenix-logo';
-    
+   
     // Add logo elements
     phoenixLogo.innerHTML = `
-        <div class="phoenix-image"></div>
-        <div class="logo-text">
-            <h1>DOOMLINGS</h1>
-            <h2>COMPANION</h2>
-        </div>
+      <div class="phoenix-image"></div>
+      <div class="logo-text">
+        <h1>DOOMLINGS</h1>
+        <h2>COMPANION</h2>
+      </div>
     `;
-    
+   
     // Insert the logo at the top of the container
     const container = document.querySelector('.container');
     const nav = container.querySelector('.nav');
     container.insertBefore(phoenixLogo, nav);
+   
+    // Add the CSS to the head
+    const style = document.createElement('style');
+    style.textContent = `
+      .phoenix-logo {
+        position: relative;
+        width: 100%;
+        max-width: 350px;
+        height: 120px;
+        margin: 0 auto 20px;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(255, 60, 0, 0.3), 0 0 30px rgba(0, 150, 200, 0.2);
+      }
+     
+      .phoenix-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('fire_water_phoenix.png');
+        background-size: cover;
+        background-position: center;
+        z-index: 1;
+      }
+     
+      .logo-text {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        text-align: center;
+        z-index: 2;
+      }
+     
+      .logo-text h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--accent1);
+        text-shadow: 0 0 10px rgba(255, 60, 0, 0.8);
+      }
+     
+      .logo-text h2 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--text);
+        letter-spacing: 2px;
+      }
+      
+      .loading-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      
+      .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 8px solid rgba(255, 60, 0, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent1);
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
     
-    // Load all data first
-    await loadAllData();
-    
-    // Initialize features
-    updateNameInputs(2);
-    generateDominantList();
-    updatePlayerSelects();
-    updateAgeSliders();
-    initializeMeaningOfLife();
-    initializeTrinkets();
-    switchToChallengePage();
-    
-    // Load saved state from cookies
-    loadGameState();
-    setupAutoSave();
-    
-    // Add scaling multiplier display
-    addScalingMultiplierDisplay();
+    // Start the application initialization process
+    initApplication();
 });
+
+// Remove the original initialization code since we've moved it to initApplication function
+// updateNameInputs(2);
+// generateDominantList();
+// updatePlayerSelects();
+// updateAgeSliders();
+// initializeMeaningOfLife();
+// initializeTrinkets();
+// switchToChallengePage();
