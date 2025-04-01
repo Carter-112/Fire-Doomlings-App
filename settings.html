@@ -303,6 +303,9 @@
         async function loadJsonFiles() {
             try {
                 const response = await fetch('list-json-files.php');
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
                 const files = await response.json();
                 
                 const filesList = document.getElementById('jsonFilesList');
@@ -336,14 +339,28 @@
                 });
             } catch (error) {
                 console.error('Error loading JSON files:', error);
-                document.getElementById('jsonFilesList').innerHTML = 
-                    '<p style="color: #ff4444; text-align: center;">Error loading card data files</p>';
+                const filesList = document.getElementById('jsonFilesList');
+                filesList.innerHTML = `
+                    <div style="color: #ff4444; text-align: center; padding: 20px;">
+                        <p>Error loading card data files</p>
+                        <p style="font-size: 14px; color: #999;">This error typically occurs when:</p>
+                        <ul style="text-align: left; color: #999; font-size: 14px;">
+                            <li>The PHP files are not present in the correct directory</li>
+                            <li>A web server is not running</li>
+                            <li>PHP is not installed or configured correctly</li>
+                        </ul>
+                        <p style="margin-top: 10px;">Please ensure you're running this through a web server (like XAMPP, WAMP, or similar) and that all PHP files are in the correct location.</p>
+                    </div>
+                `;
             }
         }
 
         async function loadJsonContent(filename) {
             try {
                 const response = await fetch(`get-json-content.php?file=${encodeURIComponent(filename)}`);
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+                }
                 const content = await response.json();
                 document.getElementById(`content-${filename}`).textContent = JSON.stringify(content, null, 2);
             } catch (error) {
@@ -416,4 +433,4 @@
         }
     </script>
 </body>
-</html> 
+</html>
