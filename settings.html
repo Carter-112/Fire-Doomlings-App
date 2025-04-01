@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings - Doomlings App</title>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.google.com https://*.googleapis.com https://*.googleusercontent.com https://oauth2.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.google.com https://*.googleapis.com https://oauth2.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://*.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' https://*.google.com https://*.googleusercontent.com data:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.google.com https://*.googleapis.com https://*.googleusercontent.com https://oauth2.googleapis.com https://*.gstatic.com; connect-src 'self' https://*.google.com https://*.googleapis.com https://oauth2.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://*.gstatic.com; style-src 'self' 'unsafe-inline' https://accounts.google.com https://*.gstatic.com; img-src 'self' https://*.google.com https://*.googleusercontent.com data:;">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin-allow-popups">
     <link rel="stylesheet" href="style.css">
     <style>
         .settings-container {
@@ -322,7 +323,7 @@
         </div>
     </div>
 
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://accounts.google.com/gsi/client" async></script>
     <script>
         let currentUser = null;
         let accessToken = null;
@@ -333,7 +334,9 @@
         window.onload = function() {
             google.accounts.id.initialize({
                 client_id: CLIENT_ID,
-                callback: handleCredentialResponse
+                callback: handleCredentialResponse,
+                auto_select: true,
+                use_fedcm_for_prompt: true
             });
 
             const tokenClient = google.accounts.oauth2.initTokenClient({
@@ -352,10 +355,15 @@
                         console.log('Existing token revoked');
                         accessToken = null;
                         localStorage.removeItem('googleAccessToken');
-                        tokenClient.requestAccessToken({ prompt: 'consent' });
+                        tokenClient.requestAccessToken({
+                            prompt: 'consent',
+                            hint: currentUser?.email
+                        });
                     });
                 } else {
-                    tokenClient.requestAccessToken({ prompt: 'consent' });
+                    tokenClient.requestAccessToken({
+                        prompt: 'consent'
+                    });
                 }
             });
 
