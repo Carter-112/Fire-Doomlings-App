@@ -337,7 +337,8 @@
                 client_id: CLIENT_ID,
                 callback: handleCredentialResponse,
                 auto_select: false,
-                cancel_on_tap_outside: true
+                cancel_on_tap_outside: true,
+                itp_support: true
             });
 
             // Initialize OAuth client
@@ -348,22 +349,22 @@
                 error_callback: (err) => {
                     console.error('Authentication error:', err);
                     signOut();
-                }
+                },
+                prompt: ''  // Empty string for no prompt
             });
 
             // Add click handler for sign-in button
-            document.getElementById('googleSignIn').addEventListener('click', () => {
-                if (accessToken) {
-                    signOut();
-                    setTimeout(() => {
-                        tokenClient.requestAccessToken({
-                            prompt: 'consent'
-                        });
-                    }, 500);
-                } else {
+            document.getElementById('googleSignIn').addEventListener('click', async () => {
+                try {
+                    if (accessToken) {
+                        await signOut();
+                    }
                     tokenClient.requestAccessToken({
-                        prompt: 'consent'
+                        prompt: 'consent',
+                        state: 'try_sample_request'
                     });
+                } catch (error) {
+                    console.error('Error during sign in:', error);
                 }
             });
 
@@ -378,34 +379,85 @@
             }
         };
 
-        function handleCredentialResponse(response) {
-            if (response.credential) {
+        async function signOut() {
+            if (!accessToken) return;
+
+            try {
+                // Clear UI first
+                currentUser = null;
+                const userInfo = document.getElementById('userInfo');
+                const signInButton = document.getElementById('googleSignIn');
+                const jsonFilesList = document.getElementById('jsonFilesList');
+                
+                userInfo.style.display = 'none';
+                signInButton.style.display = 'block';
+                jsonFilesList.innerHTML = '';
+
+                // Revoke and clear token
+                const response = await fetch('https://oauth2.googleapis.com/revoke', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `token=${accessToken}`
+                });
+
+                if (!response.ok) {
+                    console.warn('Token revocation failed:', response.status);
+                }
+            } catch (error) {
+                console.error('Error during sign out:', error);
+            } finally {
+                // Always clear local state
+                accessToken = null;
+                localStorage.removeItem('googleAccessToken');
+                console.log('Token cleared');
+            }
+        }
+
+        async function handleCredentialResponse(response) {
+            if (!response.credential) {
+                console.error('No credential received');
+                return;
+            }
+
+            try {
                 const tokenClient = google.accounts.oauth2.initTokenClient({
                     client_id: CLIENT_ID,
                     scope: SCOPES,
                     callback: handleAuthResponse,
+                    error_callback: (err) => {
+                        console.error('Token client error:', err);
+                    }
                 });
-                tokenClient.requestAccessToken({ prompt: 'consent' });
+
+                tokenClient.requestAccessToken({
+                    prompt: '',
+                    hint: response.credential
+                });
+            } catch (error) {
+                console.error('Error in credential response:', error);
             }
         }
 
         async function handleAuthResponse(response) {
-            if (response.error !== undefined) {
-                console.error('Authentication error:', response.error);
-                signOut();
+            if (response.error) {
+                console.error('Auth response error:', response.error);
+                await signOut();
                 return;
             }
             
             if (response.access_token) {
-                accessToken = response.access_token;
-                localStorage.setItem('googleAccessToken', accessToken);
                 try {
+                    accessToken = response.access_token;
+                    localStorage.setItem('googleAccessToken', accessToken);
+                    
                     await loadUserInfo();
                     await loadSyncedData();
                     await loadJsonFiles();
                 } catch (error) {
                     console.error('Error during initialization:', error);
-                    signOut();
+                    await signOut();
                 }
             }
         }
@@ -450,36 +502,6 @@
             } catch (error) {
                 console.error('Error loading user info:', error);
                 throw error;
-            }
-        }
-
-        function signOut() {
-            if (accessToken) {
-                try {
-                    // Clear UI first
-                    currentUser = null;
-                    const userInfo = document.getElementById('userInfo');
-                    const signInButton = document.getElementById('googleSignIn');
-                    const jsonFilesList = document.getElementById('jsonFilesList');
-                    
-                    userInfo.style.display = 'none';
-                    signInButton.style.display = 'block';
-                    jsonFilesList.innerHTML = '';
-
-                    // Revoke and clear token
-                    fetch('https://oauth2.googleapis.com/revoke?token=' + accessToken, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        }
-                    }).finally(() => {
-                        accessToken = null;
-                        localStorage.removeItem('googleAccessToken');
-                        console.log('Token revoked and cleared');
-                    });
-                } catch (error) {
-                    console.error('Error during sign out:', error);
-                }
             }
         }
 
