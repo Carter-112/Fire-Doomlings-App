@@ -9,9 +9,17 @@
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="unsafe-none">
     <link rel="stylesheet" href="style.css">
     <style>
+        .container {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+
         .settings-container {
             max-width: 800px;
-            width: 95%;
+            width: 90%;
             margin: 40px auto;
             padding: 20px;
             background: rgba(0, 0, 0, 0.7);
@@ -19,6 +27,14 @@
             box-shadow: 0 0 20px rgba(0, 157, 255, 0.3);
             box-sizing: border-box;
             overflow-x: hidden;
+        }
+
+        @media screen and (max-width: 600px) {
+            .settings-container {
+                width: 95%;
+                padding: 15px;
+                margin: 20px auto;
+            }
         }
 
         .settings-section {
