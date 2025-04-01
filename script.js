@@ -2106,10 +2106,28 @@ async function loadAllData() {
     }
 }
 
-// Function to initialize everything after data is loaded
-async function initializeApp() {
+// Master initialization function
+async function initApplication() {
+    // Step 1: Show loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.innerHTML = '<div class="loading-spinner"></div>';
+    document.body.appendChild(loadingIndicator);
+    
+    // Disable interactive elements until data is loaded
+    document.querySelectorAll('button, select, input').forEach(el => {
+        el.classList.add('loading-disabled');
+        el.disabled = true;
+    });
+    
     try {
-        // Initialize features
+        // Step 2: Load JSON data
+        const dataLoaded = await loadAllData();
+        if (!dataLoaded) {
+            throw new Error("Failed to load data");
+        }
+        
+        // Step 3: Initialize UI components
         updateNameInputs(2);
         generateDominantList();
         updatePlayerSelects();
@@ -2118,29 +2136,45 @@ async function initializeApp() {
         initializeTrinkets();
         switchToChallengePage();
         
-        // Load saved state from localStorage
+        // Step 4: Load saved state from localStorage
         if (typeof loadGameState === 'function') {
-            await loadGameState();
-            console.log("Game state loaded successfully");
+            loadGameState();
         } else {
             console.warn("loadGameState function not found - saved state won't be loaded");
         }
         
-        // Setup auto-save
+        // Step 5: Setup auto-save
         if (typeof setupAutoSave === 'function') {
             setupAutoSave();
-            console.log("Auto-save set up successfully");
         } else {
             console.warn("setupAutoSave function not found - auto-save won't be enabled");
         }
+        
+        // Step 6: Enable UI
+        document.querySelectorAll('.loading-disabled').forEach(el => {
+            el.classList.remove('loading-disabled');
+            el.disabled = false;
+        });
+        
+        // Remove loading indicator
+        loadingIndicator.remove();
+        
+        console.log("Application initialized successfully");
     } catch (error) {
-        console.error("Error initializing app:", error);
+        console.error('Failed to initialize application:', error);
+        loadingIndicator.innerHTML = `
+            <div style="color: white; text-align: center; padding: 20px;">
+                <p>Error initializing the application.</p>
+                <p>${error.message}</p>
+                <button onclick="location.reload()" style="padding: 8px 16px; margin-top: 10px;">Retry</button>
+            </div>
+        `;
     }
 }
 
-// Replace existing DOMContentLoaded event handler
-document.addEventListener('DOMContentLoaded', async function() {
-    // Create phoenix logo
+// Single DOMContentLoaded event handler for all initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Create the phoenix logo
     const phoenixLogo = document.createElement('div');
     phoenixLogo.className = 'phoenix-logo';
    
@@ -2210,35 +2244,44 @@ document.addEventListener('DOMContentLoaded', async function() {
         color: var(--text);
         letter-spacing: 2px;
       }
+      
+      .loading-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+      
+      .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 8px solid rgba(255, 60, 0, 0.3);
+        border-radius: 50%;
+        border-top-color: var(--accent1);
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
     `;
     document.head.appendChild(style);
     
-    try {
-        // First, load all JSON data
-        console.log("Loading JSON data...");
-        const dataLoaded = await loadAllData();
-        
-        if (!dataLoaded) {
-            console.error("Failed to load essential JSON data. App cannot initialize properly.");
-            alert("Failed to load game data. Please check that all JSON files are present and reload the page.");
-            return;
-        }
-        
-        console.log("JSON data loaded successfully");
-        
-        // Then initialize Supabase
-        if (typeof initSupabase === 'function') {
-            console.log("Initializing Supabase...");
-            const supabaseInitialized = await initSupabase();
-            console.log("Supabase initialized:", supabaseInitialized);
-        } else {
-            console.warn("Supabase initialization function not found");
-        }
-        
-        // Finally initialize the app
-        await initializeApp();
-    } catch (error) {
-        console.error("Error during initialization:", error);
-        alert("An error occurred while initializing the app. Check console for details.");
-    }
+    // Start the application initialization process
+    initApplication();
 });
+
+// Remove the original initialization code since we've moved it to initApplication function
+// updateNameInputs(2);
+// generateDominantList();
+// updatePlayerSelects();
+// updateAgeSliders();
+// initializeMeaningOfLife();
+// initializeTrinkets();
+// switchToChallengePage();
