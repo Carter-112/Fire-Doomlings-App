@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Doomlings App</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .settings-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 157, 255, 0.3);
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        .settings-section h2 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .scale-control {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .scale-control label {
+            color: #fff;
+            min-width: 200px;
+        }
+
+        .scale-control input[type="range"] {
+            flex: 1;
+        }
+
+        .scale-value {
+            color: #00ff88;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .json-editor {
+            margin-top: 20px;
+        }
+
+        .json-file {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 157, 255, 0.3);
+        }
+
+        .json-file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .json-file-name {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .json-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .json-content {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            color: #fff;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .json-edit-mode {
+            display: none;
+        }
+
+        .json-edit-mode textarea {
+            width: 100%;
+            min-height: 200px;
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 1px solid rgba(0, 157, 255, 0.5);
+            border-radius: 5px;
+            padding: 10px;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #007bff, #00ff88);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 157, 255, 0.4);
+        }
+
+        .delete-btn {
+            background: linear-gradient(45deg, #ff4444, #ff0000);
+        }
+
+        .confirm-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 0, 0, 0.5);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .confirm-dialog h3 {
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <div class="blue-glow-container">
+        <div class="blue-circles">
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="settings-container">
+            <h1 style="color: #fff; text-align: center; margin-bottom: 30px;">Settings</h1>
+
+            <!-- Meaning of Life Scaling Section -->
+            <div class="settings-section">
+                <h2>Meaning of Life Scaling</h2>
+                <div class="scale-control">
+                    <label>Enable Scaling:</label>
+                    <input type="checkbox" id="enableScaling" checked>
+                </div>
+                <div class="scale-control">
+                    <label>Scaling Multiplier:</label>
+                    <input type="range" id="scalingMultiplier" min="0" max="5" step="0.1" value="1">
+                    <span class="scale-value" id="scalingValue">1.0x</span>
+                </div>
+            </div>
+
+            <!-- JSON Files Section -->
+            <div class="settings-section">
+                <h2>JSON Files Management</h2>
+                <div id="jsonFilesList">
+                    <!-- JSON files will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="overlay" id="overlay"></div>
+    <div class="confirm-dialog" id="confirmDialog">
+        <h3>Are you sure you want to delete this file?</h3>
+        <div class="confirm-actions">
+            <button class="action-btn" onclick="confirmDelete()">Yes, Delete</button>
+            <button class="action-btn" onclick="cancelDelete()">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 20px; margin-top: 40px; color: #666;">
+        <a href="Fire-Doomlings-App.html" style="color: #666; text-decoration: none;">Back to Main App</a>
+    </footer>
+
+    <script>
+        // Load settings from localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const enableScaling = localStorage.getItem('enableScaling') !== 'false';
+            const scalingMultiplier = parseFloat(localStorage.getItem('scalingMultiplier')) || 1;
+            
+            document.getElementById('enableScaling').checked = enableScaling;
+            document.getElementById('scalingMultiplier').value = scalingMultiplier;
+            document.getElementById('scalingValue').textContent = scalingMultiplier.toFixed(1) + 'x';
+            
+            loadJsonFiles();
+        });
+
+        // Handle scaling controls
+        document.getElementById('enableScaling').addEventListener('change', function(e) {
+            localStorage.setItem('enableScaling', e.target.checked);
+        });
+
+        document.getElementById('scalingMultiplier').addEventListener('input', function(e) {
+            const value = parseFloat(e.target.value);
+            document.getElementById('scalingValue').textContent = value.toFixed(1) + 'x';
+            localStorage.setItem('scalingMultiplier', value);
+        });
+
+        // JSON Files Management
+        let currentFile = null;
+        let filesToDelete = null;
+
+        async function loadJsonFiles() {
+            try {
+                const response = await fetch('list-json-files.php');
+                const files = await response.json();
+                
+                const filesList = document.getElementById('jsonFilesList');
+                filesList.innerHTML = '';
+                
+                files.forEach(file => {
+                    const fileDiv = document.createElement('div');
+                    fileDiv.className = 'json-file';
+                    fileDiv.innerHTML = `
+                        <div class="json-file-header">
+                            <span class="json-file-name">${file}</span>
+                            <div class="json-actions">
+                                <button class="action-btn" onclick="editJsonFile('${file}')">Edit</button>
+                                <button class="action-btn delete-btn" onclick="deleteJsonFile('${file}')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="json-content" id="content-${file}">Loading...</div>
+                        <div class="json-edit-mode" id="edit-${file}">
+                            <textarea id="editor-${file}"></textarea>
+                            <button class="action-btn" onclick="saveJsonFile('${file}')">Save</button>
+                            <button class="action-btn" onclick="cancelEdit('${file}')">Cancel</button>
+                        </div>
+                    `;
+                    filesList.appendChild(fileDiv);
+                    loadJsonContent(file);
+                });
+            } catch (error) {
+                console.error('Error loading JSON files:', error);
+            }
+        }
+
+        async function loadJsonContent(filename) {
+            try {
+                const response = await fetch(`get-json-content.php?file=${encodeURIComponent(filename)}`);
+                const content = await response.json();
+                document.getElementById(`content-${filename}`).textContent = JSON.stringify(content, null, 2);
+            } catch (error) {
+                console.error(`Error loading ${filename}:`, error);
+                document.getElementById(`content-${filename}`).textContent = 'Error loading file';
+            }
+        }
+
+        function editJsonFile(filename) {
+            const content = document.getElementById(`content-${filename}`).textContent;
+            const editor = document.getElementById(`editor-${filename}`);
+            editor.value = content;
+            
+            document.getElementById(`content-${filename}`).style.display = 'none';
+            document.getElementById(`edit-${filename}`).style.display = 'block';
+        }
+
+        async function saveJsonFile(filename) {
+            try {
+                const content = document.getElementById(`editor-${filename}`).value;
+                const response = await fetch('save-json-file.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        filename: filename,
+                        content: content
+                    })
+                });
+                
+                if (response.ok) {
+                    loadJsonContent(filename);
+                    document.getElementById(`content-${filename}`).style.display = 'block';
+                    document.getElementById(`edit-${filename}`).style.display = 'none';
+                }
+            } catch (error) {
+                console.error(`Error saving ${filename}:`, error);
+            }
+        }
+
+        function cancelEdit(filename) {
+            document.getElementById(`content-${filename}`).style.display = 'block';
+            document.getElementById(`edit-${filename}`).style.display = 'none';
+        }
+
+        function deleteJsonFile(filename) {
+            filesToDelete = filename;
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('confirmDialog').style.display = 'block';
+        }
+
+        function confirmDelete() {
+            if (filesToDelete) {
+                fetch(`delete-json-file.php?file=${encodeURIComponent(filesToDelete)}`)
+                    .then(response => {
+                        if (response.ok) {
+                            loadJsonFiles();
+                        }
+                    })
+                    .catch(error => console.error('Error deleting file:', error));
+            }
+            cancelDelete();
+        }
+
+        function cancelDelete() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('confirmDialog').style.display = 'none';
+            filesToDelete = null;
+        }
+    </script>
+</body>
+</html> 
