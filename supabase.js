@@ -4,69 +4,30 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 // Direct console logging for immediate debugging
 console.log("Supabase.js loaded, URL:", SUPABASE_URL);
-console.log("Creating Supabase client...");
 
 // Global variable for the Supabase client
 let supabase = null;
 
-// Create Supabase client
-function createSupabaseClient() {
-    if (typeof createClient !== 'function') {
-        console.error("CRITICAL ERROR: createClient function is not available! Wait for module to load.");
-        
-        // Poll for createClient availability - sometimes modules take time to load
-        let attempts = 0;
-        const maxAttempts = 10;
-        
-        const checkInterval = setInterval(() => {
-            attempts++;
-            console.log(`Checking for createClient (Attempt ${attempts}/${maxAttempts})...`);
-            
-            if (typeof createClient === 'function') {
-                console.log("createClient found! Creating Supabase client now.");
-                clearInterval(checkInterval);
-                initializeClient();
-            } else if (attempts >= maxAttempts) {
-                console.error("Failed to find createClient after multiple attempts. Supabase will not work.");
-                clearInterval(checkInterval);
-                
-                // Show error in the UI
-                if (document.getElementById('supabaseStatus')) {
-                    document.getElementById('supabaseStatus').textContent = 'ERROR: Module not loaded';
-                    document.getElementById('supabaseStatus').style.color = 'red';
-                }
-                
-                if (document.getElementById('testResult')) {
-                    document.getElementById('testResult').textContent = "Failed to load Supabase module. Try using a local HTTP server instead of file:// protocol.";
-                }
-            }
-        }, 500);
-        
-        return null;
-    }
-    
-    return initializeClient();
-}
-
+// Create Supabase client - simplified and more reliable
 function initializeClient() {
     try {
-        // Create the Supabase client
+        if (typeof createClient !== 'function') {
+            console.error("createClient function is not available!");
+            return null;
+        }
+        
+        // Create the Supabase client immediately
         const client = createClient(SUPABASE_URL, SUPABASE_KEY);
         console.log("Supabase client created successfully");
         return client;
     } catch (error) {
         console.error("Error creating Supabase client:", error);
-        
-        if (document.getElementById('testResult')) {
-            document.getElementById('testResult').textContent = "Error: " + error.message;
-        }
-        
         return null;
     }
 }
 
-// Initialize Supabase client
-supabase = createSupabaseClient();
+// Initialize user
+let currentUser = null;
 
 // Global debug flag
 const ENABLE_DEBUG = true;
@@ -83,10 +44,13 @@ async function signInAnonymously() {
     console.log("signInAnonymously called");
     logDebug('Attempting anonymous sign-in');
     
-    // Make sure supabase is initialized
+    // Create Supabase client if not already initialized
     if (!supabase) {
-        console.error("Cannot sign in: Supabase client not initialized");
-        return null;
+        supabase = initializeClient();
+        if (!supabase) {
+            console.error("Cannot sign in: Failed to initialize Supabase client");
+            return null;
+        }
     }
     
     try {
@@ -104,14 +68,6 @@ async function signInAnonymously() {
         
         // If not, create a new anonymous session
         console.log('No session found, creating anonymous user');
-        
-        // Check if anonymous auth is enabled
-        try {
-            const { data: authSettings, error: authError } = await supabase.rpc('get_auth_settings');
-            console.log("Auth settings:", authSettings, authError);
-        } catch (e) {
-            console.log("Couldn't check auth settings, continuing anyway:", e);
-        }
         
         const authResponse = await supabase.auth.signInAnonymously();
         console.log("Anonymous auth response:", authResponse);
@@ -137,21 +93,26 @@ async function signInAnonymously() {
     }
 }
 
-// Initialize user
-let currentUser = null;
-
 // Data operations
 async function saveToSupabase(table, data) {
     logDebug(`Saving to table '${table}'`);
     
+    // Create Supabase client if not already initialized
     if (!supabase) {
-        logDebug('Supabase client not initialized, cannot save');
-        return false;
+        supabase = initializeClient();
+        if (!supabase) {
+            logDebug('Failed to initialize Supabase client, cannot save');
+            return false;
+        }
     }
     
     if (!currentUser) {
-        logDebug('No user available, cannot save');
-        return false;
+        logDebug('No user available, trying to sign in...');
+        currentUser = await signInAnonymously();
+        if (!currentUser) {
+            logDebug('Authentication failed, cannot save');
+            return false;
+        }
     }
     
     try {
@@ -182,14 +143,22 @@ async function saveToSupabase(table, data) {
 async function loadFromSupabase(table) {
     logDebug(`Loading from table '${table}'`);
     
+    // Create Supabase client if not already initialized
     if (!supabase) {
-        logDebug('Supabase client not initialized, cannot load');
-        return null;
+        supabase = initializeClient();
+        if (!supabase) {
+            logDebug('Failed to initialize Supabase client, cannot load');
+            return null;
+        }
     }
     
     if (!currentUser) {
-        logDebug('No user available, cannot load');
-        return null;
+        logDebug('No user available, trying to sign in...');
+        currentUser = await signInAnonymously();
+        if (!currentUser) {
+            logDebug('Authentication failed, cannot load');
+            return null;
+        }
     }
     
     try {
@@ -291,22 +260,34 @@ async function deleteCookie(name) {
 async function testSupabaseConnection() {
     logDebug('=== RUNNING SUPABASE CONNECTION TEST ===');
     
+    // Create Supabase client if not already initialized
     if (!supabase) {
-        const errorMsg = 'Supabase client not initialized. Cannot run test.';
-        logDebug(errorMsg);
-        document.getElementById('testResult').innerHTML = errorMsg;
-        return false;
+        supabase = initializeClient();
+        if (!supabase) {
+            const errorMsg = 'Failed to initialize Supabase client. Cannot run test.';
+            logDebug(errorMsg);
+            document.getElementById('testResult').innerHTML = errorMsg;
+            return false;
+        }
     }
     
     try {
-        // 1. Check if we have a logged-in user
+        // 1. Ensure we have a logged-in user
         if (!currentUser) {
-            logDebug('ERROR: No current user, test cannot continue');
-            document.getElementById('testResult').innerHTML = 'ERROR: Not authenticated. Please refresh the page.';
-            return false;
+            logDebug('No current user, attempting to sign in...');
+            currentUser = await signInAnonymously();
+            
+            if (!currentUser) {
+                logDebug('ERROR: Authentication failed, test cannot continue');
+                document.getElementById('testResult').innerHTML = 'ERROR: Authentication failed. Check console for details.';
+                return false;
+            }
         }
         
         logDebug('User ID:', currentUser.id);
+        document.getElementById('supabaseUserId').textContent = currentUser.id;
+        document.getElementById('supabaseStatus').textContent = 'Connected';
+        document.getElementById('supabaseStatus').style.color = 'green';
         
         // 2. Try to save test data
         const testData = { test: 'Test data ' + new Date().toISOString() };
@@ -356,6 +337,16 @@ async function testSupabaseConnection() {
 // Initialize Supabase connection
 async function initSupabase() {
     logDebug('Initializing Supabase connection to:', SUPABASE_URL);
+    
+    // Create Supabase client if not already initialized
+    if (!supabase) {
+        supabase = initializeClient();
+        if (!supabase) {
+            document.getElementById('supabaseStatus').textContent = 'Initialization Failed';
+            document.getElementById('supabaseStatus').style.color = 'red';
+            return false;
+        }
+    }
     
     try {
         currentUser = await signInAnonymously();
@@ -453,6 +444,11 @@ function setupAutoSave() {
 
 // The function that's called when the page loads
 document.addEventListener('DOMContentLoaded', async () => {
+    // Create the client immediately
+    if (!supabase) {
+        supabase = initializeClient();
+    }
+    
     const supabaseInitialized = await initSupabase();
     console.log('Supabase initialized:', supabaseInitialized);
     
