@@ -1336,7 +1336,20 @@ function generateAgeDeck() {
     // Reset to first age
     currentAgeIndex = 0;
     displayCurrentAge();
-    scrollToCurrentAge();
+    
+    // Add gentle scrolling for better UX when generating a new deck
+    const ageDisplay = document.getElementById('ageDisplay');
+    if (ageDisplay) {
+        // Calculate position to scroll to (about halfway to the element)
+        const rect = ageDisplay.getBoundingClientRect();
+        const targetY = window.scrollY + rect.top - (window.innerHeight / 2);
+        
+        // Scroll smoothly to the position
+        window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+        });
+    }
 }
                
         // Display the current age
@@ -1393,7 +1406,7 @@ function generateAgeDeck() {
             document.getElementById('ageDisplay').innerHTML = ageContent;
             document.getElementById('ageCounter').textContent = `Age ${currentAgeIndex + 1}/${currentAgeDeck.length}`;
            
-            scrollToCurrentAge();
+            // Removed scrollToCurrentAge() call to prevent auto-scrolling
         }
        
         // Navigate to the next age
@@ -1433,7 +1446,7 @@ function generateAgeDeck() {
     document.getElementById('catastropheSlider').max = catastropheAgeData.length;
 }
 
-// Add this function to your JavaScript
+// This function remains available but we don't call it automatically for prev/next
 function scrollToCurrentAge() {
     // Get the element that displays the current age
     const ageDisplay = document.getElementById('current-age-display');
@@ -1455,7 +1468,7 @@ function previousAge() {
     if (currentAgeIndex > 0) {
         currentAgeIndex--;
         displayCurrentAge();
-        // Scroll will happen in displayCurrentAge()
+        // Removed comment about scrolling happening in displayCurrentAge
     }
 }
 
@@ -1463,7 +1476,7 @@ function nextAge() {
     if (currentAgeIndex < currentAgeDeck.length - 1) {
         currentAgeIndex++;
         displayCurrentAge();
-        // Scroll will happen in displayCurrentAge()
+        // Removed comment about scrolling happening in displayCurrentAge
     }
 }
 

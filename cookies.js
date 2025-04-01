@@ -59,6 +59,9 @@ function saveGameState() {
         }
     });
     setCookie('dominantState', dominantState);
+    
+    // Also explicitly save the persistentTierSelections object
+    setCookie('persistentTierSelections', persistentTierSelections);
 
     // Save trinket data
     setCookie('playerTrinkets', playerTrinkets);
@@ -68,6 +71,12 @@ function saveGameState() {
     // Save meaning of life data
     setCookie('playerMeaningCards', playerMeaningCards);
     setCookie('playerMeaningChoices', playerMeaningChoices);
+    
+    // Save current age deck and index
+    setCookie('currentAgeDeck', currentAgeDeck);
+    setCookie('currentAgeIndex', currentAgeIndex);
+    
+    console.log("Game state saved successfully");
 }
 
 function loadGameState() {
@@ -89,6 +98,7 @@ function loadGameState() {
     // Load age setup
     const savedAgeSetup = getCookie('ageSetup');
     if (savedAgeSetup) {
+        // Update UI elements
         document.getElementById('normalSlider').value = savedAgeSetup.normalAges;
         document.getElementById('merchantSlider').value = savedAgeSetup.merchantAges;
         document.getElementById('catastropheSlider').value = savedAgeSetup.catastropheAges;
@@ -98,6 +108,19 @@ function loadGameState() {
         document.getElementById('normalCount').textContent = savedAgeSetup.normalAges;
         document.getElementById('merchantCount').textContent = savedAgeSetup.merchantAges;
         document.getElementById('catastropheCount').textContent = savedAgeSetup.catastropheAges;
+        
+        // Update the ageSetup object in memory
+        ageSetup.normalAges = savedAgeSetup.normalAges;
+        ageSetup.merchantAges = savedAgeSetup.merchantAges;
+        ageSetup.catastropheAges = savedAgeSetup.catastropheAges;
+        ageSetup.finalCatastropheAtEnd = savedAgeSetup.finalCatastropheAtEnd;
+    }
+    
+    // Load persistent tier selections
+    const savedTierSelections = getCookie('persistentTierSelections');
+    if (savedTierSelections) {
+        // Update the global variable directly
+        persistentTierSelections = savedTierSelections;
     }
 
     // Load dominant data
@@ -110,13 +133,44 @@ function loadGameState() {
                     card.dataset.currentTier = data.tier;
                     const tierSelect = card.querySelector('.tier-select');
                     if (tierSelect) tierSelect.value = data.tier;
+                    
+                    // Update the tier display
+                    const tierDisplay = card.querySelector('.tier-display');
+                    if (tierDisplay) {
+                        tierDisplay.textContent = data.tier;
+                        tierDisplay.style.background = `hsl(${130 - (data.tier * 15)}, 70%, 30%)`;
+                    }
+                    
+                    // Update the description
+                    const descDisplay = card.querySelector('.tier-description');
+                    if (descDisplay) {
+                        const domName = card.querySelector('.dominant-name').textContent.trim();
+                        const dominant = dominantData.find(d => d.name === domName);
+                        if (dominant && dominant.tiers && dominant.tiers[data.tier]) {
+                            descDisplay.textContent = dominant.tiers[data.tier];
+                            descDisplay.style.display = 'block';
+                        }
+                    }
                 }
                 if (data.player) {
                     const playerSelect = card.querySelector('.player-select');
                     if (playerSelect) playerSelect.value = data.player;
+                    
+                    // Update the visual indicator
+                    const domName = card.querySelector('.dominant-name').textContent.trim();
+                    card.style.background = data.player ? 
+                        `linear-gradient(to right, ${getNameColor(domName)}22, transparent)` : '';
                 }
             }
         });
+        
+        // Save player assignments to the global variable
+        playerAssignments = Object.entries(savedDominantState).reduce((acc, [stableId, data]) => {
+            if (data.player) {
+                acc[stableId] = data.player;
+            }
+            return acc;
+        }, {});
     }
 
     // Load trinket data
@@ -136,11 +190,25 @@ function loadGameState() {
     const savedPlayerMeaningChoices = getCookie('playerMeaningChoices');
     if (savedPlayerMeaningChoices) playerMeaningChoices = savedPlayerMeaningChoices;
 
-    // Update UI
+    // Load current age deck and index
+    const savedCurrentAgeDeck = getCookie('currentAgeDeck');
+    if (savedCurrentAgeDeck) currentAgeDeck = savedCurrentAgeDeck;
+    
+    const savedCurrentAgeIndex = getCookie('currentAgeIndex');
+    if (savedCurrentAgeIndex !== null) currentAgeIndex = savedCurrentAgeIndex;
+    
+    // Update UI based on loaded data
     updatePlayerSelects();
     generateDominantList();
     updateTrinketSection();
     updateMeaningOfLifeSection();
+    
+    // Update age display if we have a current deck
+    if (currentAgeDeck && currentAgeDeck.length > 0) {
+        displayCurrentAge();
+    }
+    
+    console.log("Game state loaded successfully");
 }
 
 // Auto-save when changes are made
