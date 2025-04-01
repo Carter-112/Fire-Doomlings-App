@@ -1,6 +1,9 @@
 <?php
 header('Content-Type: application/json');
 
-$jsonFiles = glob('*.json');
-echo json_encode($jsonFiles);
+// Get all JSON files in the current directory
+$files = glob('*.json');
+
+// Return the list of files
+echo json_encode($files);
 ?> 

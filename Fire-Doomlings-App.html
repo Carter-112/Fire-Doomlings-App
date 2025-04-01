@@ -146,5 +146,26 @@
     <!-- Scripts should be at the end of body for better performance -->
     <script src="cookies.js"></script>
     <script src="script.js"></script>
+    <script>
+        function openSettings() {
+            // Check if user is authenticated
+            if (!accessToken) {
+                // If not authenticated, show Google Sign-In
+                google.accounts.oauth2.initTokenClient({
+                    client_id: CLIENT_ID,
+                    scope: SCOPES,
+                    callback: (response) => {
+                        if (response.access_token) {
+                            accessToken = response.access_token;
+                            window.location.href = 'settings.html';
+                        }
+                    },
+                }).requestAccessToken();
+            } else {
+                // If already authenticated, go to settings
+                window.location.href = 'settings.html';
+            }
+        }
+    </script>
 </body>
 </html>
