@@ -303,11 +303,12 @@
 
     <script src="https://apis.google.com/js/api.js"></script>
     <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="config.js"></script>
     <script>
         let currentUser = null;
         let accessToken = null;
-        const API_KEY = 'AIzaSyBTeJZXX8c9ACkk74Rgpn4DlaPIvF5fOA0';
-        const CLIENT_ID = '994920508017-f4195a89495bkbanqtm4eeint6nfcqdc.apps.googleusercontent.com';
+        const API_KEY = config.API_KEY;
+        const CLIENT_ID = config.CLIENT_ID;
         const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
         const SCOPES = 'https://www.googleapis.com/auth/drive.file';
 
