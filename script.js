@@ -2213,23 +2213,32 @@ document.addEventListener('DOMContentLoaded', async function() {
     `;
     document.head.appendChild(style);
     
-    // Initialize Supabase first
     try {
+        // First, load all JSON data
+        console.log("Loading JSON data...");
+        const dataLoaded = await loadAllData();
+        
+        if (!dataLoaded) {
+            console.error("Failed to load essential JSON data. App cannot initialize properly.");
+            alert("Failed to load game data. Please check that all JSON files are present and reload the page.");
+            return;
+        }
+        
+        console.log("JSON data loaded successfully");
+        
+        // Then initialize Supabase
         if (typeof initSupabase === 'function') {
             console.log("Initializing Supabase...");
             const supabaseInitialized = await initSupabase();
             console.log("Supabase initialized:", supabaseInitialized);
-            
-            // Then initialize the app
-            await initializeApp();
         } else {
-            console.warn("Supabase initialization function not found, proceeding with regular initialization");
-            // Fall back to regular initialization if Supabase isn't available
-            initializeApp();
+            console.warn("Supabase initialization function not found");
         }
+        
+        // Finally initialize the app
+        await initializeApp();
     } catch (error) {
         console.error("Error during initialization:", error);
-        // Fall back to regular initialization if Supabase initialization fails
-        initializeApp();
+        alert("An error occurred while initializing the app. Check console for details.");
     }
 });
