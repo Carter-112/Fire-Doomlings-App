@@ -332,13 +332,15 @@
         const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
 
         window.onload = function() {
+            // Initialize Google Identity Services
             google.accounts.id.initialize({
                 client_id: CLIENT_ID,
                 callback: handleCredentialResponse,
-                auto_select: true,
-                use_fedcm_for_prompt: true
+                auto_select: false,
+                cancel_on_tap_outside: true
             });
 
+            // Initialize OAuth client
             const tokenClient = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
@@ -349,17 +351,15 @@
                 }
             });
 
+            // Add click handler for sign-in button
             document.getElementById('googleSignIn').addEventListener('click', () => {
                 if (accessToken) {
-                    google.accounts.oauth2.revoke(accessToken, () => {
-                        console.log('Existing token revoked');
-                        accessToken = null;
-                        localStorage.removeItem('googleAccessToken');
+                    signOut();
+                    setTimeout(() => {
                         tokenClient.requestAccessToken({
-                            prompt: 'consent',
-                            hint: currentUser?.email
+                            prompt: 'consent'
                         });
-                    });
+                    }, 500);
                 } else {
                     tokenClient.requestAccessToken({
                         prompt: 'consent'
@@ -454,21 +454,33 @@
         }
 
         function signOut() {
-            currentUser = null;
-            accessToken = null;
-            localStorage.removeItem('googleAccessToken');
-            
-            const userInfo = document.getElementById('userInfo');
-            const signInButton = document.getElementById('googleSignIn');
-            
-            userInfo.style.display = 'none';
-            signInButton.style.display = 'block';
-            document.getElementById('jsonFilesList').innerHTML = '';
-            
-            // Clear the token
-            google.accounts.oauth2.revoke(accessToken, () => {
-                console.log('Token revoked');
-            });
+            if (accessToken) {
+                try {
+                    // Clear UI first
+                    currentUser = null;
+                    const userInfo = document.getElementById('userInfo');
+                    const signInButton = document.getElementById('googleSignIn');
+                    const jsonFilesList = document.getElementById('jsonFilesList');
+                    
+                    userInfo.style.display = 'none';
+                    signInButton.style.display = 'block';
+                    jsonFilesList.innerHTML = '';
+
+                    // Revoke and clear token
+                    fetch('https://oauth2.googleapis.com/revoke?token=' + accessToken, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
+                    }).finally(() => {
+                        accessToken = null;
+                        localStorage.removeItem('googleAccessToken');
+                        console.log('Token revoked and cleared');
+                    });
+                } catch (error) {
+                    console.error('Error during sign out:', error);
+                }
+            }
         }
 
         // Load JSON files from Google Drive
