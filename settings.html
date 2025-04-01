@@ -670,20 +670,24 @@
                 }
             });
 
-            // Scroll to active button
-            if (activeButton) {
-                const container = document.querySelector('.scale-buttons');
-                const containerWidth = container.offsetWidth;
-                const buttonLeft = activeButton.offsetLeft;
-                const buttonWidth = activeButton.offsetWidth;
-                
-                // Calculate the scroll position to center the button
-                const scrollPosition = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
-                container.scrollTo({
-                    left: scrollPosition,
-                    behavior: 'smooth'
-                });
-            }
+            // Wait for layout to be complete before scrolling
+            setTimeout(() => {
+                if (activeButton) {
+                    const container = document.querySelector('.scale-buttons');
+                    const containerRect = container.getBoundingClientRect();
+                    const buttonRect = activeButton.getBoundingClientRect();
+                    
+                    // Calculate the scroll position to center the button
+                    const scrollPosition = buttonRect.left - containerRect.left - 
+                                        (containerRect.width / 2) + (buttonRect.width / 2) +
+                                        container.scrollLeft;
+                    
+                    container.scrollTo({
+                        left: Math.max(0, scrollPosition),
+                        behavior: 'smooth'
+                    });
+                }
+            }, 100);
         });
 
         document.getElementById('enableScaling').addEventListener('change', function(e) {
