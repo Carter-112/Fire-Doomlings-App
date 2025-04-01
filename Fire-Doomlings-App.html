@@ -6,16 +6,43 @@
     <title>DOOMlings Companion</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- Load Supabase in the head -->
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script>
-        // Make createClient available globally as soon as possible
-        console.log("HTML: Setting up createClient...");
-        if (typeof supabase !== 'undefined' && supabase.createClient) {
-            console.log("HTML: supabase object available, extracting createClient");
+    <!-- Load Supabase correctly with module import -->
+    <script type="module">
+        // Import directly from CDN with proper export
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        // Make it available globally
+        window.createClient = createClient;
+        console.log("Supabase loaded via ESM, createClient is now global");
+        
+        // Test immediately if it's working
+        const testStatus = document.createElement('div');
+        testStatus.id = 'loadStatus';
+        testStatus.style.position = 'fixed';
+        testStatus.style.bottom = '50px';
+        testStatus.style.right = '10px';
+        testStatus.style.background = 'green';
+        testStatus.style.color = 'white';
+        testStatus.style.padding = '5px';
+        testStatus.style.borderRadius = '4px';
+        testStatus.textContent = 'Supabase Ready';
+        document.body.appendChild(testStatus);
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            testStatus.style.display = 'none';
+        }, 3000);
+    </script>
+    
+    <!-- Fallback non-module loading as backup -->
+    <script nomodule src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script nomodule>
+        // For older browsers that don't support modules
+        if (typeof supabase !== 'undefined') {
             window.createClient = supabase.createClient;
+            console.log("Supabase loaded via UMD, createClient is now global");
         } else {
-            console.error("HTML: supabase object not available or missing createClient function!");
+            console.error("Failed to load Supabase via UMD fallback");
         }
     </script>
     
@@ -233,6 +260,13 @@
     </div>
 
     <script>
+        // Check for createClient availability immediately
+        if (typeof createClient === 'function') {
+            console.log("createClient is available globally in the main script");
+        } else {
+            console.error("createClient is NOT available globally in the main script");
+        }
+        
         function toggleTestPanel() {
             const panel = document.getElementById('supabaseTestPanel');
             panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
@@ -318,7 +352,7 @@
         }
     </script>
     
-    <!-- Load our scripts -->
+    <!-- Load our scripts AFTER the createClient is available -->
     <script src="supabase.js"></script>
     <script src="script.js"></script>
 </body>

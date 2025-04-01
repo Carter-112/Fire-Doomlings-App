@@ -6,19 +6,67 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 console.log("Supabase.js loaded, URL:", SUPABASE_URL);
 console.log("Creating Supabase client...");
 
-try {
-    // Check if the supabase object exists
+// Global variable for the Supabase client
+let supabase = null;
+
+// Create Supabase client
+function createSupabaseClient() {
     if (typeof createClient !== 'function') {
-        console.error("CRITICAL ERROR: createClient is not available! Supabase library may not be loaded correctly.");
-        document.getElementById('testResult').textContent = "ERROR: Supabase library not loaded correctly. Check console.";
+        console.error("CRITICAL ERROR: createClient function is not available! Wait for module to load.");
+        
+        // Poll for createClient availability - sometimes modules take time to load
+        let attempts = 0;
+        const maxAttempts = 10;
+        
+        const checkInterval = setInterval(() => {
+            attempts++;
+            console.log(`Checking for createClient (Attempt ${attempts}/${maxAttempts})...`);
+            
+            if (typeof createClient === 'function') {
+                console.log("createClient found! Creating Supabase client now.");
+                clearInterval(checkInterval);
+                initializeClient();
+            } else if (attempts >= maxAttempts) {
+                console.error("Failed to find createClient after multiple attempts. Supabase will not work.");
+                clearInterval(checkInterval);
+                
+                // Show error in the UI
+                if (document.getElementById('supabaseStatus')) {
+                    document.getElementById('supabaseStatus').textContent = 'ERROR: Module not loaded';
+                    document.getElementById('supabaseStatus').style.color = 'red';
+                }
+                
+                if (document.getElementById('testResult')) {
+                    document.getElementById('testResult').textContent = "Failed to load Supabase module. Try using a local HTTP server instead of file:// protocol.";
+                }
+            }
+        }, 500);
+        
+        return null;
     }
     
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log("Supabase client created successfully");
-} catch (e) {
-    console.error("Error creating Supabase client:", e);
-    document.getElementById('testResult').textContent = "ERROR: " + e.message;
+    return initializeClient();
 }
+
+function initializeClient() {
+    try {
+        // Create the Supabase client
+        const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log("Supabase client created successfully");
+        return client;
+    } catch (error) {
+        console.error("Error creating Supabase client:", error);
+        
+        if (document.getElementById('testResult')) {
+            document.getElementById('testResult').textContent = "Error: " + error.message;
+        }
+        
+        return null;
+    }
+}
+
+// Initialize Supabase client
+supabase = createSupabaseClient();
 
 // Global debug flag
 const ENABLE_DEBUG = true;
@@ -34,6 +82,12 @@ function logDebug(...args) {
 async function signInAnonymously() {
     console.log("signInAnonymously called");
     logDebug('Attempting anonymous sign-in');
+    
+    // Make sure supabase is initialized
+    if (!supabase) {
+        console.error("Cannot sign in: Supabase client not initialized");
+        return null;
+    }
     
     try {
         // First check if we already have a session
@@ -90,6 +144,11 @@ let currentUser = null;
 async function saveToSupabase(table, data) {
     logDebug(`Saving to table '${table}'`);
     
+    if (!supabase) {
+        logDebug('Supabase client not initialized, cannot save');
+        return false;
+    }
+    
     if (!currentUser) {
         logDebug('No user available, cannot save');
         return false;
@@ -122,6 +181,11 @@ async function saveToSupabase(table, data) {
 
 async function loadFromSupabase(table) {
     logDebug(`Loading from table '${table}'`);
+    
+    if (!supabase) {
+        logDebug('Supabase client not initialized, cannot load');
+        return null;
+    }
     
     if (!currentUser) {
         logDebug('No user available, cannot load');
@@ -199,6 +263,11 @@ async function getCookie(name) {
 }
 
 async function deleteCookie(name) {
+    if (!supabase) {
+        console.error('Supabase client not initialized, cannot delete');
+        return;
+    }
+    
     if (currentUser) {
         try {
             await supabase
@@ -221,6 +290,13 @@ async function deleteCookie(name) {
 // Test function to directly check Supabase connectivity
 async function testSupabaseConnection() {
     logDebug('=== RUNNING SUPABASE CONNECTION TEST ===');
+    
+    if (!supabase) {
+        const errorMsg = 'Supabase client not initialized. Cannot run test.';
+        logDebug(errorMsg);
+        document.getElementById('testResult').innerHTML = errorMsg;
+        return false;
+    }
     
     try {
         // 1. Check if we have a logged-in user
