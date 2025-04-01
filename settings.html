@@ -161,6 +161,33 @@
             background: rgba(0, 0, 0, 0.7);
             z-index: 999;
         }
+
+        .scale-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .scale-button {
+            padding: 8px 16px;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scale-button:hover {
+            background: rgba(0, 157, 255, 0.2);
+            border-color: rgba(0, 157, 255, 0.5);
+        }
+
+        .scale-button.active {
+            background: rgba(0, 157, 255, 0.3);
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -176,9 +203,6 @@
     </div>
 
     <div class="container">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <a href="Fire-Doomlings-App.html" style="color: #666; text-decoration: none; font-size: 16px;">← Back to Main App</a>
-        </div>
         <div class="settings-container">
             <h1 style="color: #fff; text-align: center; margin-bottom: 30px;">Settings</h1>
 
@@ -186,13 +210,18 @@
             <div class="settings-section">
                 <h2>Meaning of Life Scaling</h2>
                 <div class="scale-control">
-                    <label>Enable Scaling:</label>
+                    <label>Enable Dynamic Scaling:</label>
                     <input type="checkbox" id="enableScaling" checked>
                 </div>
                 <div class="scale-control">
                     <label>Scaling Multiplier:</label>
-                    <input type="range" id="scalingMultiplier" min="0" max="5" step="0.1" value="1">
-                    <span class="scale-value" id="scalingValue">1.0x</span>
+                    <div class="scale-buttons">
+                        <button class="scale-button" data-value="0.25">1/4x</button>
+                        <button class="scale-button" data-value="0.5">1/2x</button>
+                        <button class="scale-button active" data-value="1">1x</button>
+                        <button class="scale-button" data-value="2">2x</button>
+                        <button class="scale-button" data-value="4">4x</button>
+                    </div>
                 </div>
             </div>
 
@@ -202,6 +231,10 @@
                 <div id="jsonFilesList">
                     <!-- JSON files will be loaded here -->
                 </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="Fire-Doomlings-App.html" style="color: #666; text-decoration: none; font-size: 16px;">← Back to Main App</a>
             </div>
         </div>
     </div>
@@ -223,8 +256,15 @@
             const scalingMultiplier = parseFloat(localStorage.getItem('scalingMultiplier')) || 1;
             
             document.getElementById('enableScaling').checked = enableScaling;
-            document.getElementById('scalingMultiplier').value = scalingMultiplier;
-            document.getElementById('scalingValue').textContent = scalingMultiplier.toFixed(1) + 'x';
+            
+            // Set active button based on saved multiplier
+            document.querySelectorAll('.scale-button').forEach(button => {
+                if (parseFloat(button.dataset.value) === scalingMultiplier) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
             
             loadJsonFiles();
         });
@@ -236,12 +276,24 @@
             window.location.reload();
         });
 
-        document.getElementById('scalingMultiplier').addEventListener('input', function(e) {
-            const value = parseFloat(e.target.value);
-            document.getElementById('scalingValue').textContent = value.toFixed(1) + 'x';
-            localStorage.setItem('scalingMultiplier', value);
-            // Force a page reload to apply the changes
-            window.location.reload();
+        // Handle scale buttons
+        document.querySelectorAll('.scale-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                document.querySelectorAll('.scale-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Save the new multiplier
+                const value = parseFloat(this.dataset.value);
+                localStorage.setItem('scalingMultiplier', value);
+                
+                // Force a page reload to apply the changes
+                window.location.reload();
+            });
         });
 
         // JSON Files Management

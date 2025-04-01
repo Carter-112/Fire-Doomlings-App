@@ -1820,11 +1820,17 @@ function calculateScalingMultiplier() {
     // Get total number of ages
     const totalAges = ageSetup.normalAges + ageSetup.merchantAges + ageSetup.catastropheAges;
    
-    // Calculate scaling multiplier (total ages / 20)
+    // Calculate base scaling multiplier (total ages / 20)
     // 20 is considered the average number of ages in a normal game
-    const sM = Math.max(1, totalAges / 20);
+    const baseSM = Math.max(1, totalAges / 20);
    
-    return sM;
+    // Get the manual scaling multiplier from settings
+    const { enableScaling, scalingMultiplier } = getScalingSettings();
+    
+    // If dynamic scaling is disabled, use 1 as the base
+    const finalSM = enableScaling ? baseSM * scalingMultiplier : scalingMultiplier;
+    
+    return finalSM;
 }
 
 // Function to process Meaning of Life card descriptions with the scaling multiplier
