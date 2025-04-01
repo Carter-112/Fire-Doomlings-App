@@ -136,8 +136,15 @@
 </div>
     </div>
 
-    <!-- Scripts should be at the end of body for better performance -->
-    <script src="cookies.js"></script>
+    <!-- Supabase library for cross-device sync -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // Make createClient available globally
+        const { createClient } = supabase;
+    </script>
+    
+    <!-- Load our scripts -->
+    <script src="supabase.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
