@@ -2285,3 +2285,33 @@ document.addEventListener('DOMContentLoaded', function() {
 // initializeMeaningOfLife();
 // initializeTrinkets();
 // switchToChallengePage();
+
+// Load scaling settings
+function getScalingSettings() {
+    const enableScaling = localStorage.getItem('enableScaling') !== 'false';
+    const scalingMultiplier = parseFloat(localStorage.getItem('scalingMultiplier')) || 1;
+    return { enableScaling, scalingMultiplier };
+}
+
+// Apply scaling to a value
+function applyScaling(value) {
+    const { enableScaling, scalingMultiplier } = getScalingSettings();
+    if (!enableScaling) return value;
+    return value * scalingMultiplier;
+}
+
+// Update the generateAgeDeck function to use scaling
+function generateAgeDeck() {
+    // ... existing code ...
+    
+    // Apply scaling to the values if enabled
+    const { enableScaling, scalingMultiplier } = getScalingSettings();
+    if (enableScaling) {
+        // Apply scaling to your age values here
+        // Example: age.value = applyScaling(age.value);
+    }
+    
+    // ... rest of the existing code ...
+}
+
+// ... rest of the existing code ...

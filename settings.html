@@ -176,6 +176,9 @@
     </div>
 
     <div class="container">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <a href="Fire-Doomlings-App.html" style="color: #666; text-decoration: none; font-size: 16px;">← Back to Main App</a>
+        </div>
         <div class="settings-container">
             <h1 style="color: #fff; text-align: center; margin-bottom: 30px;">Settings</h1>
 
@@ -193,9 +196,9 @@
                 </div>
             </div>
 
-            <!-- JSON Files Section -->
+            <!-- Card Data Section -->
             <div class="settings-section">
-                <h2>JSON Files Management</h2>
+                <h2>Card Data Management</h2>
                 <div id="jsonFilesList">
                     <!-- JSON files will be loaded here -->
                 </div>
@@ -213,11 +216,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer style="text-align: center; padding: 20px; margin-top: 40px; color: #666;">
-        <a href="Fire-Doomlings-App.html" style="color: #666; text-decoration: none;">Back to Main App</a>
-    </footer>
-
     <script>
         // Load settings from localStorage
         document.addEventListener('DOMContentLoaded', function() {
@@ -234,12 +232,16 @@
         // Handle scaling controls
         document.getElementById('enableScaling').addEventListener('change', function(e) {
             localStorage.setItem('enableScaling', e.target.checked);
+            // Force a page reload to apply the changes
+            window.location.reload();
         });
 
         document.getElementById('scalingMultiplier').addEventListener('input', function(e) {
             const value = parseFloat(e.target.value);
             document.getElementById('scalingValue').textContent = value.toFixed(1) + 'x';
             localStorage.setItem('scalingMultiplier', value);
+            // Force a page reload to apply the changes
+            window.location.reload();
         });
 
         // JSON Files Management
@@ -253,6 +255,11 @@
                 
                 const filesList = document.getElementById('jsonFilesList');
                 filesList.innerHTML = '';
+                
+                if (files.length === 0) {
+                    filesList.innerHTML = '<p style="color: #666; text-align: center;">No card data files found</p>';
+                    return;
+                }
                 
                 files.forEach(file => {
                     const fileDiv = document.createElement('div');
@@ -277,6 +284,8 @@
                 });
             } catch (error) {
                 console.error('Error loading JSON files:', error);
+                document.getElementById('jsonFilesList').innerHTML = 
+                    '<p style="color: #ff4444; text-align: center;">Error loading card data files</p>';
             }
         }
 
