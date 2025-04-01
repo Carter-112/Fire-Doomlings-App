@@ -2,10 +2,26 @@
 const SUPABASE_URL = 'https://amfrqooxhxdejbeltbxa.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZnJxb294aHhkZWpiZWx0YnhhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NjgxMjMsImV4cCI6MjA1OTA0NDEyM30.7Trplc0IR4OT_EPdFiH7voEsodP8yXX6MISbapr7UWo';
 
+// Table name constants to ensure consistency
+const TABLE_NAMES = {
+  PLAYER_NAMES: 'playerNames',
+  AGE_SETUP: 'ageSetup',
+  DOMINANT_STATE: 'dominantState',
+  PERSISTENT_TIER_SELECTIONS: 'persistentTiersSelections', // Note the correct name
+  PLAYER_TRINKETS: 'playerTrinkets',
+  PLAYER_TRINKET_SCORES: 'playerTrinketScores',
+  AVAILABLE_TRINKETS: 'availableTrinkets',
+  PLAYER_MEANING_CARDS: 'playerMeaningCards',
+  PLAYER_MEANING_CHOICES: 'playerMeaningChoices',
+  CURRENT_AGE_DECK: 'currentAgeDeck',
+  CURRENT_AGE_INDEX: 'currentAgeIndex',
+  PLAYER_ASSIGNMENTS: 'playerAssignments'
+};
+
 // Direct console logging for immediate debugging
 console.log("Supabase.js loaded, URL:", SUPABASE_URL);
 
-// Global variables
+// Global Variables
 let supabase = null;
 let currentUser = null;
 let syncQueue = [];
@@ -109,7 +125,8 @@ async function runConnectionDiagnostics() {
     cors: null,
     network: null,
     authTest: null,
-    dnsTest: null
+    dnsTest: null,
+    tableTests: {}
   };
   
   // Try a simple fetch to test CORS and basic connectivity
@@ -165,6 +182,28 @@ async function runConnectionDiagnostics() {
         error: error.message
       };
     }
+    
+    // Test each table
+    if (currentUser) {
+      for (const tableName of Object.values(TABLE_NAMES)) {
+        try {
+          const { data, error } = await supabase
+            .from(tableName)
+            .select('id')
+            .limit(1);
+            
+          diagnostics.tableTests[tableName] = {
+            success: !error,
+            error: error ? error.message : null
+          };
+        } catch (error) {
+          diagnostics.tableTests[tableName] = {
+            success: false,
+            error: error.message
+          };
+        }
+      }
+    }
   }
   
   // Create a detailed report and log it
@@ -186,6 +225,14 @@ async function runConnectionDiagnostics() {
     
     ❌ Last Error: ${diagnostics.lastError !== 'None' ? diagnostics.lastError.message : 'None'}
   `;
+  
+  // Add table test results if available
+  if (Object.keys(diagnostics.tableTests).length > 0) {
+    report += `\n    📋 TABLE TESTS:\n`;
+    for (const [table, result] of Object.entries(diagnostics.tableTests)) {
+      report += `    - ${table}: ${result.success ? '✅ Passed' : '❌ Failed - ' + result.error}\n`;
+    }
+  }
   
   // Return the report for display
   return {
@@ -396,7 +443,7 @@ async function syncSaveOperation(operation) {
         .from(operation.table)
         .update({
           data: operation.data,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('id', existingData.id);
     } else {
@@ -405,13 +452,33 @@ async function syncSaveOperation(operation) {
         .insert({
           user_id: currentUser.id,
           data: operation.data,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         });
     }
     
     const { error: saveError } = await saveOp;
     
     if (saveError) {
+      // Handle unique constraint violations
+      if (saveError.code === '23505') {
+        console.log(`Unique constraint violation for ${operation.table}. Attempting direct update.`);
+        
+        // Try a direct update if insert failed due to unique constraint
+        const { error: updateError } = await supabase
+          .from(operation.table)
+          .update({
+            data: operation.data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', currentUser.id);
+          
+        if (updateError) {
+          throw updateError;
+        }
+        
+        return { success: true };
+      }
+      
       throw saveError;
     }
     
@@ -477,6 +544,51 @@ async function signInAnonymously() {
     recordError('authentication', error);
     // Fall back to localStorage if Supabase authentication fails
     return null;
+  }
+}
+
+// Verify database schema
+async function verifyDatabaseSchema() {
+  if (!supabase || !currentUser) return false;
+  
+  try {
+    logDebug('Verifying database schema...');
+    
+    // Check if all required tables exist
+    const requiredTables = Object.values(TABLE_NAMES);
+    const missingTables = [];
+    
+    for (const table of requiredTables) {
+      try {
+        const { data, error } = await supabase
+          .from(table)
+          .select('id')
+          .limit(1);
+          
+        if (error && error.code === '42P01') {
+          missingTables.push(table);
+        }
+      } catch (err) {
+        if (err.message && err.message.includes('relation') && err.message.includes('does not exist')) {
+          missingTables.push(table);
+        }
+      }
+    }
+    
+    if (missingTables.length > 0) {
+      console.error('Missing database tables:', missingTables);
+      updateStatus(AppStatus.ERROR, {
+        shortMessage: 'Database Schema Error',
+        message: `Missing tables: ${missingTables.join(', ')}`
+      });
+      return false;
+    }
+    
+    logDebug('Database schema verification successful');
+    return true;
+  } catch (error) {
+    recordError('schema_verification', error);
+    return false;
   }
 }
 
@@ -549,32 +661,58 @@ async function saveToSupabase(table, data) {
       throw checkError;
     }
     
-    let saveOperation;
+    let saveResult;
     
     if (existingData && existingData.id) {
       logDebug(`Existing record found with ID ${existingData.id}, updating...`);
-      saveOperation = supabase
+      saveResult = await supabase
         .from(table)
         .update({
           data: data,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         })
         .eq('id', existingData.id);
     } else {
       logDebug(`No existing record found, inserting new record...`);
-      saveOperation = supabase
+      saveResult = await supabase
         .from(table)
         .insert({
           user_id: currentUser.id,
           data: data,
-          updated_at: new Date()
+          updated_at: new Date().toISOString()
         });
     }
     
-    const { error: saveError } = await saveOperation;
+    const saveError = saveResult.error;
     
     if (saveError) {
-      // Handle specific errors
+      // Handle unique constraint violations
+      if (saveError.code === '23505') {
+        logDebug(`Unique constraint violation for ${table}. Attempting direct update.`);
+        
+        // Try a direct update if insert failed due to unique constraint
+        const { error: updateError } = await supabase
+          .from(table)
+          .update({
+            data: data,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', currentUser.id);
+          
+        if (updateError) {
+          if (isNetworkError(updateError)) {
+            recordError('save_data', updateError, { table });
+            await addToSyncQueue({ type: 'save', table, data, timestamp: new Date().toISOString() });
+            return true;
+          }
+          throw updateError;
+        }
+        
+        logDebug(`Save to '${table}' successful after constraint handling`);
+        return true;
+      }
+      
+      // Handle network errors
       if (isNetworkError(saveError)) {
         recordError('save_data', saveError, { table });
         await addToSyncQueue({ type: 'save', table, data, timestamp: new Date().toISOString() });
@@ -793,454 +931,149 @@ async function getCookie(name) {
   return await loadFromSupabase(name);
 }
 
-// Test functions for diagnostics
-async function testSupabaseConnection() {
-  logDebug('=== RUNNING SUPABASE CONNECTION TEST ===');
+// Helper function to check CORS settings
+function checkCorsSettings() {
+  const corsInfo = document.createElement('div');
+  corsInfo.className = 'cors-info';
+  corsInfo.style.cssText = `
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 12px;
+    z-index: 9999;
+    max-width: 300px;
+  `;
   
-  // Update UI
-  document.getElementById('testResult').innerHTML = 'Running connection test...';
+  corsInfo.innerHTML = `
+    <h4 style="margin-top: 0;">CORS Configuration</h4>
+    <p>If you're seeing CORS errors, make sure these origins are allowed in your Supabase project:</p>
+    <ul>
+      <li>${window.location.origin}</li>
+      <li>http://localhost:8000</li>
+      <li>http://127.0.0.1:8000</li>
+      <li>http://localhost:3000</li>
+      <li>http://localhost</li>
+    </ul>
+    <p>Configure these in your Supabase dashboard under:</p>
+    <p><strong>Project Settings > API > CORS</strong></p>
+    <button id="closeCorsInfo" style="margin-top: 10px;">Close</button>
+  `;
   
-  // Check network status first
-  if (!navigator.onLine) {
-    const errorMsg = 'Your device appears to be offline. Please check your internet connection.';
-    logDebug(errorMsg);
-    document.getElementById('testResult').innerHTML = errorMsg;
-    updateStatus(AppStatus.OFFLINE);
-    return false;
-  }
+  document.body.appendChild(corsInfo);
   
-  // Create Supabase client if not already initialized
-  if (!supabase) {
-    supabase = initializeClient();
-    if (!supabase) {
-      const errorMsg = 'Failed to initialize Supabase client. Cannot run test.';
-      logDebug(errorMsg);
-      document.getElementById('testResult').innerHTML = errorMsg;
-      return false;
-    }
-  }
-  
-  try {
-    // 1. Ensure we have a logged-in user
-    if (!currentUser) {
-      logDebug('No current user, attempting to sign in...');
-      document.getElementById('testResult').innerHTML = 'Testing authentication...';
-      
-      try {
-        currentUser = await signInAnonymously();
-      } catch (authError) {
-        const diagnostics = await runConnectionDiagnostics();
-        document.getElementById('testResult').innerHTML = 
-          `Authentication failed: ${authError.message}<br><br>` +
-          `<strong>Diagnostics:</strong><br>${diagnostics.report.replace(/\n/g, '<br>')}`;
-        return false;
-      }
-      
-      if (!currentUser) {
-        const diagnostics = await runConnectionDiagnostics();
-        document.getElementById('testResult').innerHTML = 
-          `Authentication failed. Check console for details.<br><br>` +
-          `<strong>Diagnostics:</strong><br>${diagnostics.report.replace(/\n/g, '<br>')}`;
-        return false;
-      }
-    }
-    
-    logDebug('User ID:', currentUser.id);
-    document.getElementById('supabaseUserId').textContent = currentUser.id;
-    updateStatus(AppStatus.ONLINE);
-    
-    // 2. Try to save test data
-    const testData = { test: 'Test data ' + new Date().toISOString() };
-    logDebug('Testing data operations with:', testData);
-    document.getElementById('testResult').innerHTML = 'Testing data operations...';
-    
-    try {
-      // Check for existing record first
-      const { data: existingData, error: checkError } = await supabase
-        .from('playernames')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-      
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-      
-      let saveOperation;
-      let operationType;
-      
-      if (existingData && existingData.id) {
-        // Record exists, do an update
-        logDebug(`Existing record found with ID ${existingData.id}, updating...`);
-        saveOperation = supabase
-          .from('playernames')
-          .update({
-            data: testData,
-            updated_at: new Date()
-          })
-          .eq('id', existingData.id)
-          .eq('user_id', currentUser.id);
-        operationType = 'updated';
-      } else {
-        // No record exists, attempt an insert
-        logDebug('No existing record found, inserting new record...');
-        saveOperation = supabase
-          .from('playernames')
-          .insert({
-            user_id: currentUser.id,
-            data: testData,
-            updated_at: new Date()
-          });
-        operationType = 'inserted';
-      }
-      
-      // Execute the save operation
-      const { error: saveError } = await saveOperation;
-      
-      if (saveError) {
-        if (saveError.code === '42501' || 
-            saveError.message.includes('row-level security') ||
-            saveError.message.includes('permission denied')) {
-          
-          logDebug('Row-level security error:', saveError);
-          
-          // Run diagnostics
-          const diagnostics = await runConnectionDiagnostics();
-          
-          document.getElementById('testResult').innerHTML = 
-            `RLS ERROR: Unable to write to database due to security policy.<br>` +
-            `Your app will use localStorage instead.<br>Error: ${saveError.message}<br><br>` +
-            `<strong>Diagnostics:</strong><br>${diagnostics.report.replace(/\n/g, '<br>')}`;
-          
-          updateStatus(AppStatus.LOCAL_ONLY, {
-            shortMessage: 'Security Policy Error',
-            message: saveError.message
-          });
-          
-          return false;
-        } else {
-          throw saveError;
-        }
-      }
-      
-      logDebug('Test data saved successfully');
-      
-      // 3. Try to read the data back
-      const { data: readData, error: readError } = await supabase
-        .from('playernames')
-        .select('data')
-        .eq('user_id', currentUser.id)
-        .single();
-      
-      if (readError) {
-        throw readError;
-      }
-      
-      logDebug('Test data read back successfully:', readData);
-      
-      document.getElementById('testResult').innerHTML = 
-        `✅ SUCCESS! Record ${operationType}.<br>` +
-        `User ID: ${currentUser.id}<br>` +
-        `Data: ${JSON.stringify(readData.data)}`;
-      
-      return true;
-    } catch (opError) {
-      // Run diagnostics
-      const diagnostics = await runConnectionDiagnostics();
-      
-      document.getElementById('testResult').innerHTML = 
-        `ERROR: ${opError.message}<br><br>` +
-        `<strong>Diagnostics:</strong><br>${diagnostics.report.replace(/\n/g, '<br>')}`;
-      
-      recordError('test_operations', opError);
-      return false;
-    }
-  } catch (error) {
-    // Run diagnostics
-    const diagnostics = await runConnectionDiagnostics();
-    
-    document.getElementById('testResult').innerHTML = 
-      `ERROR: ${error.message}<br><br>` +
-      `<strong>Diagnostics:</strong><br>${diagnostics.report.replace(/\n/g, '<br>')}`;
-    
-    recordError('test_connection', error);
-    return false;
-  }
+  document.getElementById('closeCorsInfo').addEventListener('click', () => {
+    corsInfo.remove();
+  });
 }
 
-// Run a direct diagnostic test
-async function runDiagnosticTest() {
-  document.getElementById('testResult').innerHTML = 'Running diagnostics...';
-  
-  try {
-    const diagnostics = await runConnectionDiagnostics();
-    document.getElementById('testResult').innerHTML = 
-      `<strong>DIAGNOSTICS REPORT:</strong><br>${diagnostics.report.replace(/\n/g, '<br>')}`;
-  } catch (error) {
-    document.getElementById('testResult').innerHTML = 
-      `Error running diagnostics: ${error.message}`;
-  }
-}
-
-// Initialize Supabase connection
+// Initialize Supabase on page load
 async function initSupabase() {
-  logDebug('Initializing Supabase connection to:', SUPABASE_URL);
+  if (supabase) {
+    console.log("Supabase already initialized");
+    return true;
+  }
   
-  // Load any pending operations
-  await loadSyncQueue();
+  console.log("Initializing Supabase...");
   
-  // Check if we're online first
-  if (!navigator.onLine) {
-    console.log("Device is offline, initializing in offline mode");
-    updateStatus(AppStatus.OFFLINE);
+  // Create the client
+  supabase = initializeClient();
+  if (!supabase) {
+    console.error("Failed to initialize Supabase client");
     return false;
   }
   
-  // Create Supabase client if not already initialized
-  if (!supabase) {
-    supabase = initializeClient();
-    if (!supabase) {
-      return false;
-    }
-  }
-  
+  // Try to authenticate
   try {
     currentUser = await signInAnonymously();
-    const success = !!currentUser;
-    logDebug('Supabase initialized:', success ? 'SUCCESS' : 'FAILED', currentUser?.id);
-    
-    if (success) {
-      updateStatus(AppStatus.ONLINE);
-      
-      // If we have pending operations, try to sync them
-      if (syncQueue.length > 0) {
-        syncLocalChanges();
-      }
-    } else {
-      updateStatus(AppStatus.ERROR, {
-        shortMessage: 'Authentication Failed',
-        message: 'Could not authenticate with Supabase'
-      });
+    if (!currentUser) {
+      console.log("Authentication failed, will operate in local-only mode");
+      updateStatus(AppStatus.LOCAL_ONLY);
+      return false;
     }
     
-    return success;
+    console.log("Authentication successful, user ID:", currentUser.id);
+    
+    // Verify database schema
+    const schemaValid = await verifyDatabaseSchema();
+    if (!schemaValid) {
+      console.error("Database schema verification failed");
+      return false;
+    }
+    
+    // Sync any pending changes
+    await syncLocalChanges();
+    
+    updateStatus(AppStatus.ONLINE);
+    console.log("Supabase initialization complete");
+    return true;
   } catch (error) {
     recordError('initialization', error);
     return false;
   }
 }
 
-// Modified save/load game state functions
-async function saveGameState() {
-  // Same implementation as before, using offline-first approach
-  const playerNames = Array.from(document.querySelectorAll('.name-input'))
-    .map(input => input.value.trim() || input.placeholder);
-  await setCookie('playerNames', playerNames);
-
-  await setCookie('ageSetup', {
-    normalAges: parseInt(document.getElementById('normalSlider').value),
-    merchantAges: parseInt(document.getElementById('merchantSlider').value),
-    catastropheAges: parseInt(document.getElementById('catastropheSlider').value),
-    finalCatastropheAtEnd: document.getElementById('finalCatastropheMode').checked
-  });
-
-  const dominantState = {};
-  document.querySelectorAll('.dominant-card').forEach(card => {
-    const stableId = card.dataset.stableId;
-    if (stableId) {
-      dominantState[stableId] = {
-        tier: card.dataset.currentTier || null,
-        player: card.querySelector('.player-select')?.value || null
-      };
-    }
-  });
-  await setCookie('dominantState', dominantState);
-  await setCookie('persistentTierSelections', persistentTierSelections);
-  await setCookie('playerTrinkets', playerTrinkets);
-  await setCookie('playerTrinketScores', playerTrinketScores);
-  await setCookie('availableTrinkets', availableTrinkets);
-  await setCookie('playerMeaningCards', playerMeaningCards);
-  await setCookie('playerMeaningChoices', playerMeaningChoices);
-  await setCookie('currentAgeDeck', currentAgeDeck);
-  await setCookie('currentAgeIndex', currentAgeIndex);
-  
-  console.log(`Game state saved (Status: ${appStatus})`);
-}
-
-async function loadGameState() {
-  // Load data using offline-first approach
-  const savedData = await getCookie('playerNames');
-  if (savedData) {
-    // Load player names and update UI
-    try {
-      updateNameInputs(savedData.length);
-      
-      const inputs = document.querySelectorAll('.name-input');
-      savedData.forEach((name, index) => {
-        if (index < inputs.length) {
-          inputs[index].value = name;
-        }
-      });
-      
-      const playerSlider = document.getElementById('playerSlider');
-      if (playerSlider) {
-        playerSlider.value = savedData.length;
-        document.getElementById('playerCount').textContent = savedData.length;
-      }
-    } catch (e) {
-      console.error('Error restoring player names:', e);
-    }
-  }
-
-  // Load other game state components using the same pattern
-  // Each would use getCookie() which has offline-first approach
-  
-  console.log(`Game state loaded (Status: ${appStatus})`);
-}
-
-// Utility function for Diagnostic Panel
-function createDiagnosticPanel() {
-  // First check if panel already exists
-  if (document.getElementById('diagnostic-panel')) {
-    return;
-  }
-  
-  const panel = document.createElement('div');
-  panel.id = 'diagnostic-panel';
-  panel.style.cssText = `
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    width: 300px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    border-radius: 8px;
-    padding: 15px;
-    font-family: monospace;
-    font-size: 12px;
-    z-index: 9999;
-    display: none;
-  `;
-  
-  panel.innerHTML = `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-      <h3 style="margin: 0; color: #fff;">Connection Diagnostics</h3>
-      <button id="close-diagnostic" style="background: none; border: none; color: white; cursor: pointer;">✕</button>
-    </div>
-    <div id="diagnostic-content" style="max-height: 300px; overflow-y: auto;">
-      <div><strong>Status:</strong> <span id="diag-status">Unknown</span></div>
-      <div><strong>User ID:</strong> <span id="diag-userid">None</span></div>
-      <div><strong>Network:</strong> <span id="diag-network">Unknown</span></div>
-      <div><strong>Last Error:</strong> <span id="diag-error">None</span></div>
-      <div><strong>Sync Queue:</strong> <span id="diag-queue">0 items</span></div>
-      <div style="margin-top: 10px;">
-        <button id="run-diagnostics" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">Run Diagnostics</button>
-        <button id="force-sync" style="background: #555; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px;">Force Sync</button>
-      </div>
-      <div id="diagnostic-result" style="margin-top: 10px; white-space: pre-wrap;"></div>
-    </div>
-  `;
-  
-  document.body.appendChild(panel);
-  
-  // Add event listeners
-  document.getElementById('close-diagnostic').addEventListener('click', () => {
-    panel.style.display = 'none';
-  });
-  
-  document.getElementById('run-diagnostics').addEventListener('click', async () => {
-    document.getElementById('diagnostic-result').textContent = 'Running diagnostics...';
-    try {
-      const diagnostics = await runConnectionDiagnostics();
-      document.getElementById('diagnostic-result').textContent = diagnostics.report;
-    } catch (error) {
-      document.getElementById('diagnostic-result').textContent = `Error: ${error.message}`;
-    }
-  });
-  
-  document.getElementById('force-sync').addEventListener('click', async () => {
-    document.getElementById('diagnostic-result').textContent = 'Forcing sync...';
-    try {
-      const result = await syncLocalChanges();
-      document.getElementById('diagnostic-result').textContent = 
-        result ? 'Sync completed successfully!' : 'Sync completed with errors. Check console.';
-      updateDiagnosticPanel();
-    } catch (error) {
-      document.getElementById('diagnostic-result').textContent = `Sync error: ${error.message}`;
-    }
-  });
-  
-  // Add global shortcut to toggle panel (Ctrl+Shift+D)
-  document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.shiftKey && e.key === 'D') {
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-      if (panel.style.display === 'block') {
-        updateDiagnosticPanel();
-      }
-    }
-  });
-  
-  return panel;
-}
-
-function updateDiagnosticPanel() {
-  document.getElementById('diag-status').textContent = appStatus;
-  document.getElementById('diag-userid').textContent = currentUser ? currentUser.id : 'None';
-  document.getElementById('diag-network').textContent = navigator.onLine ? 'Online' : 'Offline';
-  document.getElementById('diag-error').textContent = lastErrorDetails ? lastErrorDetails.shortMessage : 'None';
-  document.getElementById('diag-queue').textContent = `${syncQueue.length} items`;
-}
-
-// Set up event listeners for auto-save
-function setupAutoSave() {
-  // Using debounce to avoid too many saves
-  let saveTimeout = null;
-  const debouncedSave = () => {
-    if (saveTimeout) clearTimeout(saveTimeout);
-    saveTimeout = setTimeout(saveGameState, 1000);
-  };
-  
-  // Save state when inputs change
-  document.addEventListener('change', debouncedSave);
-  
-  // Save state when buttons are clicked
-  document.addEventListener('click', (e) => {
-    if (e.target.tagName === 'BUTTON') {
-      debouncedSave();
-    }
-  });
-}
-
-// The function that's called when the page loads
+// Add initialization to page load
 document.addEventListener('DOMContentLoaded', async () => {
-  // Check online status immediately
-  updateStatus(navigator.onLine ? AppStatus.ONLINE : AppStatus.OFFLINE);
-  console.log("Initial online status:", navigator.onLine ? "Online" : "Offline");
+  console.log("DOM loaded, initializing Supabase...");
   
-  // Create diagnostic panel (hidden by default, toggle with Ctrl+Shift+D)
-  createDiagnosticPanel();
-  
-  // Create the client if online
-  if (navigator.onLine) {
-    supabase = initializeClient();
+  // Create status indicators in the UI if they don't exist
+  if (!document.getElementById('supabaseStatus')) {
+    const statusContainer = document.createElement('div');
+    statusContainer.style.cssText = `
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid #ccc;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 9999;
+    `;
+    
+    statusContainer.innerHTML = `
+      <div>Supabase: <span id="supabaseStatus">Connecting...</span></div>
+      <div>User ID: <span id="supabaseUserId">None</span></div>
+    `;
+    
+    document.body.appendChild(statusContainer);
   }
   
-  // Initialize
-  const supabaseInitialized = await initSupabase();
-  console.log('Supabase initialized:', supabaseInitialized);
+  // Initialize Supabase
+  await initSupabase();
   
-  // Load game state (works offline-first)
-  await loadGameState();
-  
-  // Setup auto-save
-  setupAutoSave();
-  
-  // Add diagnostic info to the test panel
-  const testPanel = document.querySelector('.test-panel');
-  if (testPanel) {
-    const diagnosticButton = document.createElement('button');
-    diagnosticButton.textContent = 'Run Diagnostics';
-    diagnosticButton.onclick = runDiagnosticTest;
-    testPanel.appendChild(diagnosticButton);
+  // Load game state from Supabase or localStorage
+  try {
+    // Load player names
+    const playerNames = await getCookie(TABLE_NAMES.PLAYER_NAMES);
+    if (playerNames) {
+      console.log("Loaded player names:", playerNames);
+      // Update UI with player names
+      // ...
+    }
+    
+    // Load other game state
+    // ...
+    
+  } catch (error) {
+    console.error("Error loading game state:", error);
   }
-}); 
+});
+
+// Export functions for use in other scripts
+window.supabaseHelpers = {
+  saveToSupabase,
+  loadFromSupabase,
+  deleteCookie,
+  setCookie,
+  getCookie,
+  runConnectionDiagnostics,
+  checkCorsSettings,
+  initSupabase
+};

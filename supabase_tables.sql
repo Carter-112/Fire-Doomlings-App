@@ -154,7 +154,6 @@ CREATE INDEX currentageindex_user_id_idx ON currentageindex (user_id);
 CREATE INDEX playerassignments_user_id_idx ON playerassignments (user_id);
 
 -- Create views with camelCase names to match JavaScript naming
--- Removed SECURITY INVOKER to fix syntax error
 CREATE OR REPLACE VIEW "playerNames" AS 
   SELECT id, user_id, data, updated_at FROM playernames;
   
@@ -430,6 +429,28 @@ GRANT ALL ON TABLE currentagedeck TO anon, authenticated;
 GRANT ALL ON TABLE currentageindex TO anon, authenticated;
 GRANT ALL ON TABLE playerassignments TO anon, authenticated;
 
+-- Create a helper function for upserting data
+CREATE OR REPLACE FUNCTION upsert_player_data(
+  p_table_name TEXT,
+  p_user_id UUID,
+  p_data JSONB
+) RETURNS UUID AS $$
+DECLARE
+  v_id UUID;
+BEGIN
+  EXECUTE format('
+    INSERT INTO %I (user_id, data, updated_at)
+    VALUES ($1, $2, NOW())
+    ON CONFLICT (user_id) 
+    DO UPDATE SET data = $2, updated_at = NOW()
+    RETURNING id', p_table_name)
+  INTO v_id
+  USING p_user_id, p_data;
+  
+  RETURN v_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 ------------------------------------------------
 -- PART 2: CORS CONFIGURATION
 ------------------------------------------------
@@ -490,4 +511,4 @@ BEGIN
   RAISE NOTICE '3. To see all CORS domains you should add, run:';
   RAISE NOTICE '   SELECT * FROM cors_settings_view;';
 END;
-$$; 
+$$;
