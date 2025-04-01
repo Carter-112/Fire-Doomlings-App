@@ -192,18 +192,22 @@
         .google-signin {
             text-align: center;
             margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
         }
         .google-signin button {
             background-color: #4285f4;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             display: flex;
             align-items: center;
             margin: 0 auto;
+            transition: background-color 0.3s;
         }
         .google-signin button:hover {
             background-color: #357abd;
@@ -217,6 +221,9 @@
             text-align: center;
             margin: 10px 0;
             display: none;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
         }
         .user-info img {
             width: 32px;
@@ -226,6 +233,7 @@
         }
         .user-info span {
             vertical-align: middle;
+            color: white;
         }
     </style>
 </head>
@@ -336,7 +344,7 @@
 
         // Handle Google Sign-In
         document.getElementById('googleSignIn').addEventListener('click', function() {
-            google.accounts.oauth2.initTokenClient({
+            const client = google.accounts.oauth2.initTokenClient({
                 client_id: CLIENT_ID,
                 scope: SCOPES,
                 callback: async (response) => {
@@ -344,11 +352,12 @@
                         accessToken = response.access_token;
                         localStorage.setItem('googleAccessToken', accessToken);
                         await loadUserInfo();
-                        await loadSyncedData(); // Load synced data after login
+                        await loadSyncedData();
                         loadJsonFiles();
                     }
                 },
-            }).requestAccessToken();
+            });
+            client.requestAccessToken();
         });
 
         // Load user information
