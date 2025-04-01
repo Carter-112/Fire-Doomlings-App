@@ -5,6 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOOMlings Companion</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Supabase test panel styles */
+        #supabaseTestPanel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            width: 300px;
+            z-index: 9999;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            font-family: monospace;
+        }
+        #supabaseTestPanel h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #555;
+            padding-bottom: 5px;
+        }
+        #testResult {
+            background: #333;
+            padding: 8px;
+            margin: 8px 0;
+            border-radius: 4px;
+            min-height: 30px;
+            word-break: break-all;
+        }
+        .supabaseInfo {
+            margin-bottom: 10px;
+        }
+        #testPanel button {
+            background: #ff7700;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        #testPanel button:hover {
+            background: #ff9900;
+        }
+        .togglePanel {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            z-index: 10000;
+        }
+    </style>
 </head>
 <body>
 <div class="gradient-overlay"></div>
@@ -135,6 +195,40 @@
     </div>
 </div>
     </div>
+
+    <!-- Supabase Test Panel -->
+    <button class="togglePanel" onclick="toggleTestPanel()">🔍</button>
+    <div id="supabaseTestPanel" style="display: none;">
+        <h3>Supabase Connection Test</h3>
+        <div class="supabaseInfo">
+            Status: <span id="supabaseStatus">Unknown</span>
+        </div>
+        <div class="supabaseInfo">
+            User ID: <span id="supabaseUserId">None</span>
+        </div>
+        <div id="testPanel">
+            <button onclick="testSupabaseConnection()">Test Connection</button>
+            <button onclick="clearLocalStorage()">Clear localStorage</button>
+            <button onclick="refreshPage()">Refresh Page</button>
+        </div>
+        <div id="testResult">Test results will appear here</div>
+    </div>
+
+    <script>
+        function toggleTestPanel() {
+            const panel = document.getElementById('supabaseTestPanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function clearLocalStorage() {
+            localStorage.clear();
+            document.getElementById('testResult').textContent = "localStorage cleared";
+        }
+        
+        function refreshPage() {
+            location.reload();
+        }
+    </script>
 
     <!-- Supabase library for cross-device sync -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
