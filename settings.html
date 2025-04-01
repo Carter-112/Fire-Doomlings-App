@@ -333,25 +333,10 @@
         const SCOPES = 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
 
         window.onload = function() {
-            initializeGoogleAuth();
-        };
-
-        function initializeGoogleAuth() {
             google.accounts.id.initialize({
                 client_id: CLIENT_ID,
                 auto_select: false,
                 callback: handleCredentialResponse
-            });
-
-            const tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                prompt: 'consent',
-                callback: handleAuthResponse
-            });
-
-            document.getElementById('googleSignIn').addEventListener('click', () => {
-                tokenClient.requestAccessToken();
             });
 
             // Check for existing token
@@ -360,17 +345,72 @@
                 accessToken = storedToken;
                 validateAndLoadData();
             }
+        };
+
+        function initializeTokenClient() {
+            return google.accounts.oauth2.initTokenClient({
+                client_id: CLIENT_ID,
+                scope: SCOPES,
+                callback: handleAuthResponse,
+                error_callback: (err) => {
+                    console.error('Token client error:', err);
+                    signOut();
+                }
+            });
         }
+
+        document.getElementById('googleSignIn').addEventListener('click', () => {
+            const tokenClient = initializeTokenClient();
+            if (accessToken) {
+                signOut().then(() => {
+                    setTimeout(() => tokenClient.requestAccessToken(), 500);
+                });
+            } else {
+                tokenClient.requestAccessToken();
+            }
+        });
 
         async function validateAndLoadData() {
             try {
-                await loadUserInfo();
+                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                if (!userInfoResponse.ok) {
+                    throw new Error('Invalid token');
+                }
+
+                const userData = await userInfoResponse.json();
+                await updateUserInterface(userData);
                 await loadSyncedData();
                 await loadJsonFiles();
             } catch (error) {
                 console.error('Error validating token:', error);
                 await signOut();
             }
+        }
+
+        async function updateUserInterface(userData) {
+            currentUser = userData;
+            
+            const userInfo = document.getElementById('userInfo');
+            const signInButton = document.getElementById('googleSignIn');
+            const userImage = document.getElementById('userImage');
+            const userName = document.getElementById('userName');
+            
+            if (userData.picture) {
+                userImage.src = userData.picture;
+                userImage.style.display = 'block';
+            } else {
+                userImage.style.display = 'none';
+            }
+            
+            userName.textContent = userData.name || userData.email || 'User';
+            
+            userInfo.style.display = 'flex';
+            signInButton.style.display = 'none';
         }
 
         async function handleCredentialResponse(response) {
@@ -380,11 +420,7 @@
             }
 
             try {
-                const tokenClient = google.accounts.oauth2.initTokenClient({
-                    client_id: CLIENT_ID,
-                    scope: SCOPES,
-                    callback: handleAuthResponse
-                });
+                const tokenClient = initializeTokenClient();
                 tokenClient.requestAccessToken();
             } catch (error) {
                 console.error('Error in credential response:', error);
@@ -424,19 +460,15 @@
                 google.accounts.id.disableAutoSelect();
 
                 // Revoke token
-                try {
-                    await fetch('https://oauth2.googleapis.com/revoke', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        body: `token=${accessToken}`
-                    });
-                } catch (error) {
+                await fetch('https://oauth2.googleapis.com/revoke', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `token=${accessToken}`
+                }).catch(error => {
                     console.warn('Token revocation failed:', error);
-                }
-            } catch (error) {
-                console.error('Error during sign out:', error);
+                });
             } finally {
                 // Always clear local state
                 accessToken = null;
@@ -449,7 +481,7 @@
             if (!accessToken) return;
 
             try {
-                const response = await fetch('https://www.googleapis.com/drive/v3/files?q=mimeType="application/json"', {
+                const response = await fetch('https://www.googleapis.com/drive/v3/files?q=mimeType="application/json"&fields=files(id,name)', {
                     headers: {
                         'Authorization': `Bearer ${accessToken}`
                     }
@@ -460,36 +492,7 @@
                 }
 
                 const data = await response.json();
-                
-                const filesList = document.getElementById('jsonFilesList');
-                filesList.innerHTML = '';
-                
-                if (!data.files || data.files.length === 0) {
-                    filesList.innerHTML = '<p style="color: #666; text-align: center;">No card data files found</p>';
-                    return;
-                }
-                
-                for (const file of data.files) {
-                    const fileDiv = document.createElement('div');
-                    fileDiv.className = 'json-file';
-                    fileDiv.innerHTML = `
-                        <div class="json-file-header">
-                            <span class="json-file-name">${file.name}</span>
-                            <div class="json-actions">
-                                <button class="action-btn" onclick="editJsonFile('${file.id}')">Edit</button>
-                                <button class="action-btn delete-btn" onclick="deleteJsonFile('${file.id}')">Delete</button>
-                            </div>
-                        </div>
-                        <div class="json-content" id="content-${file.id}">Loading...</div>
-                        <div class="json-edit-mode" id="edit-${file.id}">
-                            <textarea id="editor-${file.id}"></textarea>
-                            <button class="action-btn" onclick="saveJsonFile('${file.id}')">Save</button>
-                            <button class="action-btn" onclick="cancelEdit('${file.id}')">Cancel</button>
-                        </div>
-                    `;
-                    filesList.appendChild(fileDiv);
-                    await loadJsonContent(file.id);
-                }
+                await updateJsonFilesList(data);
             } catch (error) {
                 console.error('Error loading JSON files:', error);
                 document.getElementById('jsonFilesList').innerHTML = `
@@ -498,6 +501,38 @@
                         <p style="font-size: 14px; color: #999;">Please try signing out and signing in again.</p>
                     </div>
                 `;
+            }
+        }
+
+        async function updateJsonFilesList(data) {
+            const filesList = document.getElementById('jsonFilesList');
+            filesList.innerHTML = '';
+            
+            if (!data.files || data.files.length === 0) {
+                filesList.innerHTML = '<p style="color: #666; text-align: center;">No card data files found</p>';
+                return;
+            }
+            
+            for (const file of data.files) {
+                const fileDiv = document.createElement('div');
+                fileDiv.className = 'json-file';
+                fileDiv.innerHTML = `
+                    <div class="json-file-header">
+                        <span class="json-file-name">${file.name}</span>
+                        <div class="json-actions">
+                            <button class="action-btn" onclick="editJsonFile('${file.id}')">Edit</button>
+                            <button class="action-btn delete-btn" onclick="deleteJsonFile('${file.id}')">Delete</button>
+                        </div>
+                    </div>
+                    <div class="json-content" id="content-${file.id}">Loading...</div>
+                    <div class="json-edit-mode" id="edit-${file.id}">
+                        <textarea id="editor-${file.id}"></textarea>
+                        <button class="action-btn" onclick="saveJsonFile('${file.id}')">Save</button>
+                        <button class="action-btn" onclick="cancelEdit('${file.id}')">Cancel</button>
+                    </div>
+                `;
+                filesList.appendChild(fileDiv);
+                await loadJsonContent(file.id);
             }
         }
 
@@ -702,49 +737,6 @@
                 }
             } catch (error) {
                 console.error('Error loading synced data:', error);
-                throw error;
-            }
-        }
-
-        async function loadUserInfo() {
-            try {
-                const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`Failed to load user info: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                if (!data) {
-                    throw new Error('No user data received');
-                }
-
-                currentUser = data;
-                
-                const userInfo = document.getElementById('userInfo');
-                const signInButton = document.getElementById('googleSignIn');
-                const userImage = document.getElementById('userImage');
-                const userName = document.getElementById('userName');
-                
-                if (data.picture) {
-                    userImage.src = data.picture;
-                    userImage.style.display = 'block';
-                } else {
-                    userImage.style.display = 'none';
-                }
-                
-                userName.textContent = data.name || data.email || 'User';
-                
-                userInfo.style.display = 'flex';
-                signInButton.style.display = 'none';
-                
-                return true;
-            } catch (error) {
-                console.error('Error loading user info:', error);
                 throw error;
             }
         }
