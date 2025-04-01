@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Doomlings App</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .contact-container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 157, 255, 0.3);
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid rgba(0, 157, 255, 0.5);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #007bff, #00ff88);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 157, 255, 0.4);
+        }
+
+        #status-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #00ff88;
+        }
+
+        .error {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="gradient-overlay"></div>
+    <div class="blue-glow-container">
+        <div class="blue-circles">
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+            <div class="blue-circle"></div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="contact-container">
+            <h1 style="color: #fff; text-align: center; margin-bottom: 30px;">Contact Us</h1>
+            
+            <form id="contactForm" class="contact-form">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Your Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+            
+            <div id="status-message"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
+            
+            const mailtoLink = `mailto:phoenix75.help@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\n${message}`)}`;
+            
+            const statusMessage = document.getElementById('status-message');
+            
+            try {
+                window.location.href = mailtoLink;
+                statusMessage.textContent = "Opening your email client...";
+                statusMessage.className = "success";
+                statusMessage.style.display = "block";
+                
+                // Reset form after successful submission
+                setTimeout(() => {
+                    document.getElementById('contactForm').reset();
+                }, 2000);
+            } catch (error) {
+                statusMessage.textContent = "Error opening email client. Please try again.";
+                statusMessage.className = "error";
+                statusMessage.style.display = "block";
+            }
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 20px; margin-top: 40px; color: #666;">
+        <a href="index.html" style="color: #666; text-decoration: none; margin-right: 20px;">Home</a>
+        <a href="privacy-policy.html" style="color: #666; text-decoration: none;">Privacy Policy</a>
+    </footer>
+</body>
+</html> 
