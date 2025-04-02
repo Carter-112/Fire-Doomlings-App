@@ -1084,6 +1084,16 @@ function generateAgeDeck() {
     let catastropheAges = ageSetup.catastropheAges;
     const guaranteeEndCatastrophe = ageSetup.finalCatastropheAtEnd;
    
+    // Apply scaling to the values if enabled
+    const { enableScaling, scalingMultiplier } = getScalingSettings();
+    
+    // Optionally apply scaling to age values - this affects the game balance
+    // For example, you could scale points or rewards in age descriptions
+    // We'll save the scaling info for later use in the game
+    const currentScalingMultiplier = enableScaling ? scalingMultiplier : 1;
+    // Store for use elsewhere if needed
+    localStorage.setItem('currentScalingMultiplier', currentScalingMultiplier);
+    
     // Validate inputs
     if (normalAges + merchantAges + catastropheAges <= 0) {
         alert("Please select at least one age.");
@@ -2306,18 +2316,7 @@ function applyScaling(value) {
     return value * scalingMultiplier;
 }
 
-// Update the generateAgeDeck function to use scaling
-function generateAgeDeck() {
-    // ... existing code ...
-    
-    // Apply scaling to the values if enabled
-    const { enableScaling, scalingMultiplier } = getScalingSettings();
-    if (enableScaling) {
-        // Apply scaling to your age values here
-        // Example: age.value = applyScaling(age.value);
-    }
-    
-    // ... rest of the existing code ...
-}
+// Don't redefine generateAgeDeck - the function is already defined earlier
+// The scaling functionality can be used in the existing function
 
 // ... rest of the existing code ...
