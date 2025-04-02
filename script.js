@@ -1599,12 +1599,7 @@ function assignTrinkets() {
     playerTrinkets[player] && playerTrinkets[player].length > 0
   );
  
-  if (playersWithTrinkets) {
-    alert("Some players already have trinkets. You need to reset trinkets first before reassigning.");
-    return;
-  }
- 
-  // Reset state
+  // Reset state first (whether or not players already have trinkets)
   resetTrinkets();
  
   // Shuffle available trinkets initially
