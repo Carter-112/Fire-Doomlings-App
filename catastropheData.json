@@ -1,4 +1,24 @@
 [
+  {
+    "name": "Planned Obsolescence",
+    "description": "-1 Gene Pool. Discard 1 from your hand for each Techling in your trait pile. Then draw 1 for each card you discard.",
+    "worldsEnd": "Discard 2 attachments in your trait pile."
+  },
+  {
+    "name": "Titan's Call",
+    "description": "-1 Gene Pool. If you have any dominants in your trait pile, discard all but 1 from your hand.",
+    "worldsEnd": "+3 if you have a dominant Mythling, Dinoling, or Techling in your trait pile. +2 if you have 2."
+  },
+  {
+    "name": "Anoxic Event",
+    "description": "-1 Gene Pool. Discard all face value 3 or higher from your hand, then stabilize.",
+    "worldsEnd": "-7 if your trait count is higher than 20."
+  },
+  {
+    "name": "Discovery Of Magic",
+    "description": "-1 Gene Pool. Discard 3 from your hand and stabilize. (Cannot discard Mythlings.)",
+    "worldsEnd": "If you hold any Mythlings, add their face value to your final score."
+  },
     {
         "name": "Mega Tsunami",
         "description": "-1 Gene Pool. Pass your hand to the right.",
