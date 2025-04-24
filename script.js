@@ -2311,6 +2311,8 @@ function applyScaling(value) {
     return value * scalingMultiplier;
 }
 
+//Pretend not here! ↓
+
 // Don't redefine generateAgeDeck - the function is already defined earlier
 // The scaling functionality can be used in the existing function
 
