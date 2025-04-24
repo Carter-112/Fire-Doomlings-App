@@ -861,9 +861,9 @@ function setDominantTier(select) {
 
       // Age setup global variables
       let ageSetup = {
-          normalAges: 69,
+          normalAges: 77,
           merchantAges: 10,
-          catastropheAges: 38,
+          catastropheAges: 42,
           finalCatastropheAtEnd: true
       };
       let currentAgeDeck = [];
