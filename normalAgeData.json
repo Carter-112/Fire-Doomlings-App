@@ -1,4 +1,36 @@
 [
+  {
+    "name": "Industrial Revolution",
+    "description": "On your turn: If you play an attachment, you may play another trait."
+  },
+  {
+    "name": "Age Of Stability",
+    "description": "You may stabilize to 5 immediately."
+  },
+  {
+    "name": "Return Of The Ancients",
+    "description": "Instead of taking your turn, you may draw and play 1 from the top 4 of the discard pile."
+  },
+  {
+    "name": "Thousand-Year Slumber",
+    "description": "Draw 1. If you play Slumbering this age, you may draw 4 and play another trait."
+  },
+  {
+    "name": "Open Portals",
+    "description": "Discard 2 from your hand, or 1 at random. (If this effect empties your hand, draw 3.)"
+  },
+  {
+    "name": "Age Of The Last Dragons",
+    "description": "Draw 3. Discard them OR all other cards in your hand."
+  },
+  {
+    "name": "Carbon Boom",
+    "description": "Draw 2 from the top of the discard pile. (If empty, draw from the trait deck.)"
+  },
+  {
+    "name": "Age Of The First Ferns",
+    "description": "If you have 7 or fewer traits in your trait pile, you may play 1 effectless trait now."
+  },
     {
         "name": "Birth of Life",
         "description": "Set your gene pool to 5. Play one trait on your turn. Stabilize to end your turn."
