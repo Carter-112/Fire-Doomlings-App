@@ -1,5 +1,115 @@
 [    
   {
+    "name": "Slumbering",
+    "tiers": {
+      "1": "• Tier 1: At World's End: Discard 1 from hand. If the card is: Purple: Discard up to 2 from your trait pile. Red: Add its face value. Green: Play one trait. Blue: +5. +3pt.",
+      "2": "• Tier 2: At World's End: Discard 1 from hand. Then choose one: Purple: Discard up to 3 from your trait pile. Red: Add twice its face value. Green: Play up to 2 traits. Blue: +7. +6pt.",
+      "3": "• Tier 3: At World's End: Discard 2 from hand. Then choose one: Purple: Discard up to 4 from your trait pile. Red: Add three times its face value. Green: Play up to 3 traits. Blue: +9. +8pt.",
+      "4": "• Tier 4: At World's End: Discard 2 from hand. Then choose one: Purple: Discard up to 5 Purple traits from your trait pile. Red: Add four times its face value. Green: Play all traits in your hand (Max 7). Blue: +11. +11pt.",
+      "5": "• Tier 5: At World's End: Discard any number from hand. Then choose one: Purple: Discard up to 10 traits of chosen color from your trait pile. Red: Add five times its face value. Green: Play all Green traits from your hand (Max 10). Blue: +13. +15pt."
+    }
+  },
+  {
+    "name": "Titanic",
+    "tiers": {
+      "1": "• Tier 1: To play, you must discard a total face value of 5 or higher from your trait pile using any number of cards. (Titanic cannot regenerate tissue!) +10pt.",
+      "2": "• Tier 2: To play, you must discard a total face value of 6 or higher. +14pt.",
+      "3": "• Tier 3: To play, you must discard a total face value of 5 or higher, then draw 1. +18pt.",
+      "4": "• Tier 4: To play, you must discard a total face value of 4 or higher, then draw 2. +22pt.",
+      "5": "• Tier 5: To play, you may discard any number of traits, then draw 3 and play one. +26pt."
+    }
+  },
+  {
+    "name": "Gentle",
+    "tiers": {
+      "1": "• Tier 1: To play, you must discard a face value 2 or higher from your trait pile. Opponents discard 1 from their trait pile with a higher face value. +6pt.",
+      "2": "• Tier 2: To play, you must discard a face value 1 or higher. Opponents discard 2 with a higher face value. +8pt.",
+      "3": "• Tier 3: To play, you must discard a face value 1 or higher. Opponents discard 2 with a higher face value, then you draw 1. +11pt.",
+      "4": "• Tier 4: To play, you must discard a face value 0 or higher. Opponents discard 3 with a higher face value. +14pt.",
+      "5": "• Tier 5: To play, no discard required. Opponents discard 3 with a higher face value of a chosen card in your hand and you draw 2. +18pt."
+    }
+  },
+  {
+    "name": "Hollow Bones",
+    "tiers": {
+      "1": "• Tier 1: To play, you must discard 1 positive trait from your trait pile. At World's End: choose a color. Opponents discard 2 from their trait pile of that color. +2pt.",
+      "2": "• Tier 2: To play, you must discard 1 positive trait and suppress 1 card. At World's End: choose two colors. Opponents discard 2 of each from their trait pile. +5pt.",
+      "3": "• Tier 3: To play, you must discard 2 positive traits. At World's End: choose a color. Opponents discard 5 of that color from their trait pile. +8pt.",
+      "4": "• Tier 4: To play, you may suppress 2 instead of discarding 2 if you want. At World's End: choose two colors; opponents discard 3 each of those colors. +11pt.",
+      "5": "• Tier 5: To play, no cost. At World's End: choose a color; opponents discard 7 cards of that color and you draw 2. +15pt."
+    }
+  },
+  {
+    "name": "Sorcerer",
+    "tiers": {
+      "1": "• Tier 1: At World's End: You may stabilize to 8. +2pt.",
+      "2": "• Tier 2: At World's End: You may stabilize to 8 and draw 3. +5pt.",
+      "3": "• Tier 3: At World's End: You may stabilize to 8 and draw 5. +8pt.",
+      "4": "• Tier 4: At World's End: You may stabilize to 8 and draw 8. +11pt.",
+      "5": "• Tier 5: At World's End: You may stabilize to 1 and draw 10 and play all currently in your hand including dominants even with 2 already played. +15pt."
+    }
+  },
+  {
+    "name": "Chronomancer",
+    "tiers": {
+      "1": "• Tier 1: Play another trait. At World's End: Take another turn. +1pt.",
+      "2": "• Tier 2: Play another trait twice. At World's End: Take another turn and draw 1. +4pt.",
+      "3": "• Tier 3: Play up to two additional traits. At World's End: Take another turn and draw 2. +7pt.",
+      "4": "• Tier 4: Play two additional traits and draw 1. At World's End: Take two extra turns. +11pt.",
+      "5": "• Tier 5: Play any number of additional traits (Max 7). At World's End: Take three extra turns and draw 3. +15pt."
+    }
+  },
+  {
+    "name": "Summoner",
+    "tiers": {
+      "1": "• Tier 1: Discard up to 3 from hand, then play 1 for each discarded card. Ignore Actions. +1pt.",
+      "2": "• Tier 2: Discard up to 4 from hand, then play 1 for each discarded card. Ignore Actions. +4pt.",
+      "3": "• Tier 3: Discard up to 5 from hand, then play 2 for each discarded card. Ignore Actions. +7pt.",
+      "4": "• Tier 4: Discard any number from hand, then play twice that many (Max 8). +11pt.",
+      "5": "• Tier 5: Discard any number from hand, then play twice that many (Max 12). +15pt."
+    }
+  },
+  {
+    "name": "Solar-Powered",
+    "tiers": {
+      "1": "• Tier 1: Attach. Value is equal to host's face value.",
+      "2": "• Tier 2: Attach; host trait cannot be removed from your trait pile and value is equal to host's face value. +3pt.",
+      "3": "• Tier 3: Attach; you may play the attached trait immediately. +10pt.",
+      "4": "• Tier 4: Attach to two traits simultaneously, they cannot be removed from your trait pile. Value is equal to both traits added. +9pt.",
+      "5": "• Tier 5: Attach to any number of traits of one color (Max 5), they cannot be removed from your trait pile. value is equal to all traits added. +12pt."
+    }
+  },
+  {
+    "name": "Steam-Powered",
+    "tiers": {
+      "1": "• Tier 1: Attach. If host trait is: Blue: +1 Gene Pool. Green: Play another trait. Purple: Play an action in your trait pile. Red: +2. +2pt.",
+      "2": "• Tier 2: Attach. If host is Blue: +2 Gene Pool. Green: Play two traits. Purple: Play two actions in your trait pile. Red: +3. +5pt.",
+      "3": "• Tier 3: Attach. If host is Blue: +3 Gene Pool. Green: Play three traits. Purple: Play three actions in your trait pile. Red: +4. +8pt.",
+      "4": "• Tier 4: Attach. If host is Blue: +4 Gene Pool. Green: Play all green traits in your hand (ignore actions) OR play all green traits in your hand (Max 5). Purple: Play any three actions in any hand or trait pile into your pile. Red: +5. +11pt.",
+      "5": "• Tier 5: Attach. If host is Blue: +5 Gene Pool. Green: Play all traits in your hand (ignore actions) OR play all traits in your hand (Max 8). Purple: Play all actions in any hand or pile (including discard and trait deck) into your pile (Max 7). Red: +6. +15pt."
+    }
+  },
+  {
+    "name": "Simulated Intelligence",
+    "tiers": {
+      "1": "• Tier 1: At World's End: If you are tied for the highest trait pile count, play another trait. Otherwise, discard 1 from your trait pile for each opponent with more traits than you. +6pt.",
+      "2": "• Tier 2: At World's End: If tied, play another trait and draw 1. Otherwise, discard 1 from your trait pile per opponent. +9pt.",
+      "3": "• Tier 3: At World's End: If tied, play two traits and draw 2. Otherwise, discard 2 from your trait pile per opponent. +12pt.",
+      "4": "• Tier 4: At World's End: If tied, play two traits and draw 3. Otherwise, discard 2 from your trait pile per opponent and you draw 1. +15pt.",
+      "5": "• Tier 5: At World's End: If tied, play three traits and draw 5. Otherwise, discard 3 from your trait pile per opponent. +20pt."
+    }
+  },
+  {
+    "name": "Back Propagation",
+    "tiers": {
+      "1": "• Tier 1: Attach. Host's value is now 2. At World's End: You may move this attachment to another trait in your trait pile. +2pt.",
+      "2": "• Tier 2: Attach. Host's value is now 3. At World's End: You may move this attachment and draw 1. +5pt.",
+      "3": "• Tier 3: Attach. Host's value is now 4. At World's End: You may move this attachment and draw 2, then stabilize. +8pt.",
+      "4": "• Tier 4: Attach. Host's value is now 5. At World's End: You may move this attachment, draw 3, and suppress 1 card. +11pt.",
+      "5": "• Tier 5: Attach. Host's value becomes equal to the highest trait in your pile. At World's End: You may move this attachment and draw 5. +15pt."
+    }
+  },
+  {
     "name": "IRONWOOD",
     "tiers": {
       "1": "• Tier 1: Excluding Dominants, if you have 5 or fewer green traits in your trait pile, they cannot be removed. +3pt.",
